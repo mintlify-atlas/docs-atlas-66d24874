@@ -438,3 +438,178 @@ await invoke('delete_password', {
   projectId: 'abc-123'
 });
 ```
+
+---
+
+### export_connections
+
+Export connection configurations to a file, optionally encrypted with a password.
+
+<ParamField body="projects" type="ProjectForExport[]" required>
+  Array of project connections to export
+</ParamField>
+
+<ParamField body="password" type="string">
+  Optional password to encrypt the export file
+</ParamField>
+
+<ParamField body="file_path" type="string" required>
+  Destination file path for the export
+</ParamField>
+
+```typescript TypeScript
+await invoke('export_connections', {
+  projects: [
+    {
+      id: 'abc-123',
+      name: 'Production DB',
+      host: 'localhost',
+      port: 5432,
+      database: 'myapp',
+      username: 'postgres',
+      ssl: 'require',
+      instant_commit: false,
+      read_only: false
+    }
+  ],
+  password: 'encryption-password',  // Optional
+  filePath: '/path/to/export.json'
+});
+```
+
+---
+
+### import_connections
+
+Import connection configurations from an exported file.
+
+<ParamField body="password" type="string">
+  Password to decrypt the file (required if file is encrypted)
+</ParamField>
+
+<ParamField body="file_path" type="string" required>
+  Path to the import file
+</ParamField>
+
+<ResponseField name="imported" type="ImportedProject[]">
+  Array of imported connection projects
+</ResponseField>
+
+```typescript TypeScript
+const imported = await invoke('import_connections', {
+  password: 'encryption-password',  // Optional
+  filePath: '/path/to/export.json'
+});
+```
+
+---
+
+### check_export_file
+
+Check if an export file is encrypted.
+
+<ParamField body="file_path" type="string" required>
+  Path to the export file
+</ParamField>
+
+<ResponseField name="encrypted" type="boolean">
+  True if file is encrypted, false otherwise
+</ResponseField>
+
+```typescript TypeScript
+const isEncrypted = await invoke('check_export_file', {
+  filePath: '/path/to/export.json'
+});
+```
+
+---
+
+### discover_local_databases
+
+Discover PostgreSQL databases running on localhost.
+
+<ParamField body="existing" type="ExistingConnection[]" required>
+  Array of existing connections to exclude from discovery
+</ParamField>
+
+<ResponseField name="discovered" type="DiscoveredDatabase[]">
+  <Expandable title="DiscoveredDatabase properties">
+    <ResponseField name="host" type="string">
+      Database host
+    </ResponseField>
+    
+    <ResponseField name="port" type="number">
+      Database port
+    </ResponseField>
+    
+    <ResponseField name="database" type="string">
+      Database name
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const databases = await invoke('discover_local_databases', {
+  existing: [
+    { host: 'localhost', port: 5432, database: 'postgres' }
+  ]
+});
+```
+
+---
+
+### get_current_username
+
+Get the current system username (useful for suggesting PostgreSQL usernames).
+
+<ResponseField name="username" type="string">
+  Current system username
+</ResponseField>
+
+```typescript TypeScript
+const username = await invoke('get_current_username');
+```
+
+---
+
+### get_database_info
+
+Get database server information and metadata.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ResponseField name="info" type="DatabaseInfo">
+  <Expandable title="DatabaseInfo properties">
+    <ResponseField name="version" type="string">
+      PostgreSQL version string
+    </ResponseField>
+    
+    <ResponseField name="current_database" type="string">
+      Currently connected database name
+    </ResponseField>
+    
+    <ResponseField name="current_user" type="string">
+      Current database user
+    </ResponseField>
+    
+    <ResponseField name="server_encoding" type="string">
+      Server character encoding
+    </ResponseField>
+    
+    <ResponseField name="client_encoding" type="string">
+      Client character encoding
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const info = await invoke('get_database_info', {
+  connectionId: 'abc-123-def-456'
+});
+
+console.log(`PostgreSQL ${info.version}`);
+console.log(`Database: ${info.current_database}`);
+console.log(`User: ${info.current_user}`);
+```
