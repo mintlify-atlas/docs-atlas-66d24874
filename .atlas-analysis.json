@@ -1,0 +1,113 @@
+{
+  "projectType": "saas",
+  "projectName": "Tusker",
+  "projectDescription": "A modern, fast PostgreSQL database client for macOS and Windows built with Tauri, React, and TypeScript",
+  "theme": "aspen",
+  "primaryColor": "#336791",
+  "lightColor": "#5B9BD5",
+  "darkColor": "#1E4D6B",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Get Started",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Features",
+        "groups": [
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/table-editing",
+              "features/sql-playground",
+              "features/schema-builder",
+              "features/change-management",
+              "features/filtering-sorting",
+              "features/data-import-export",
+              "features/er-diagrams"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Usage",
+            "pages": [
+              "guides/connections",
+              "guides/keyboard-shortcuts",
+              "guides/troubleshooting"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "guides/development",
+              "guides/contributing"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Backend Commands",
+            "pages": [
+              "api/connection-commands",
+              "api/schema-commands",
+              "api/data-commands",
+              "api/commit-commands"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Type-aware inline editing for all PostgreSQL data types",
+    "Foreign key lookups with real-time search",
+    "Git-like change management with commits and diff views",
+    "SQL playground with CodeMirror editor and autocomplete",
+    "Visual table schema builder with live SQL preview",
+    "Advanced filtering with type-specific operators",
+    "Multi-column sorting with shift-click",
+    "Data import/export (CSV/JSON)",
+    "ER diagram visualization",
+    "Multi-project connection management with SSL support"
+  ],
+  "publicApiSurface": [
+    "connect",
+    "connect_saved",
+    "disconnect",
+    "list_saved_connections",
+    "get_schemas",
+    "get_tables",
+    "get_columns",
+    "get_table_info",
+    "execute_query",
+    "get_table_data",
+    "insert_row",
+    "update_row",
+    "delete_rows",
+    "bulk_insert",
+    "create_table",
+    "alter_table",
+    "drop_table",
+    "save_commit",
+    "get_commits",
+    "get_commit_detail",
+    "export_project",
+    "import_project"
+  ]
+}
