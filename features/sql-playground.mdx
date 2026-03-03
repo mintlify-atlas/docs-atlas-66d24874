@@ -1,0 +1,214 @@
+---
+title: SQL playground
+description: Full-featured SQL editor with PostgreSQL syntax highlighting and autocomplete
+---
+
+The SQL Playground provides a complete code editor environment powered by CodeMirror, designed specifically for PostgreSQL query development.
+
+## Editor features
+
+### PostgreSQL syntax highlighting
+
+The editor provides intelligent syntax highlighting for PostgreSQL:
+
+- **Keywords** - Uppercase SQL keywords (SELECT, FROM, WHERE, etc.)
+- **Identifiers** - Table and column names
+- **Strings** - Single-quoted string literals
+- **Numbers** - Numeric values and constants
+- **Comments** - Both `--` line comments and `/* */` block comments
+- **Operators** - Comparison, arithmetic, and logical operators
+
+### Schema-aware autocomplete
+
+<Info>
+  Autocomplete suggestions are built from your live database schema.
+</Info>
+
+The editor provides intelligent autocomplete based on your connected database:
+
+- **Table names** - All tables from all schemas
+- **Column names** - Columns from referenced tables
+- **Schema-qualified names** - `schema.table` completion
+- **SQL keywords** - PostgreSQL-specific keywords in uppercase
+- **Functions** - Built-in PostgreSQL functions
+
+Autocomplete triggers automatically as you type, or press `Ctrl+Space` to manually invoke it.
+
+### Line numbers and gutters
+
+The editor includes:
+
+- **Line numbers** - For easy reference and error reporting
+- **Active line highlighting** - Current line has subtle background
+- **Fold gutter** - Collapse/expand code blocks
+- **Selection highlighting** - Matching text highlighted across the file
+
+### Code navigation
+
+- **Bracket matching** - Matching parentheses, brackets, and braces are highlighted
+- **Auto-closing brackets** - Automatically inserts closing characters
+- **Indent on input** - Smart indentation based on SQL structure
+- **Line wrapping** - Long lines wrap instead of scrolling horizontally
+
+## Query execution
+
+### Execute full query
+
+Press `Cmd/Ctrl+Enter` to execute the entire query:
+
+```sql
+SELECT users.name, COUNT(orders.id) AS order_count
+FROM users
+LEFT JOIN orders ON users.id = orders.user_id
+GROUP BY users.name
+ORDER BY order_count DESC;
+```
+
+Results appear in a data grid below the editor with:
+
+- Execution time in milliseconds
+- Row count
+- Column headers with data types
+- Scrollable results table
+
+<Tip>
+  You can execute multiple statements separated by semicolons. Each result set will be displayed in sequence.
+</Tip>
+
+### Execute selection
+
+Press `Cmd/Ctrl+Shift+Enter` to execute only the selected text:
+
+1. Highlight the portion of SQL you want to run
+2. Press `Cmd/Ctrl+Shift+Enter`
+3. Only the selected statement executes
+
+This is useful for testing parts of a larger query or running specific statements from a multi-statement file.
+
+## Query results
+
+### Results grid
+
+Query results display in an interactive data grid:
+
+- **Sortable columns** - Click headers to sort
+- **Resizable columns** - Drag column borders
+- **Type-aware formatting** - Dates, JSON, and NULLs formatted appropriately
+- **Copy support** - Select and copy cells
+- **Scrollable** - Handles large result sets efficiently
+
+### Execution metrics
+
+Below the results grid, you'll see:
+
+- **Execution time** - Query duration in milliseconds  
+- **Row count** - Number of rows returned
+- **Status** - Success or error message
+
+For `INSERT`, `UPDATE`, or `DELETE` statements, you'll see the affected row count instead of a result set.
+
+### Export results
+
+Export query results directly from the playground:
+
+- **CSV export** - Download results as comma-separated values
+- **JSON export** - Download as JSON array of objects
+- Native file picker for save location
+
+<Accordion title="Export workflow">
+  1. Execute your query
+  2. Click the export button in the results toolbar
+  3. Choose CSV or JSON format
+  4. Select save location
+  5. Results are written with proper formatting and headers
+</Accordion>
+
+## SQL formatting
+
+Press `Cmd/Ctrl+Shift+F` to auto-format your SQL:
+
+**Before:**
+```sql
+select users.name,orders.total from users join orders on users.id=orders.user_id where orders.status='completed'
+```
+
+**After:**
+```sql
+SELECT
+  users.name,
+  orders.total
+FROM users
+JOIN orders ON users.id = orders.user_id
+WHERE orders.status = 'completed'
+```
+
+Formatting applies:
+- Uppercase keywords
+- Proper indentation
+- Line breaks for readability
+- Aligned column lists
+
+## Query history
+
+Tusker automatically tracks your executed queries:
+
+- **Persistent history** - Queries saved across sessions
+- **Quick recall** - Click any historical query to load it
+- **Execution metadata** - Timestamp and execution time
+- **Search** - Filter history by query text
+
+Access query history from the sidebar panel in the SQL playground.
+
+## Saved queries
+
+### Save a query
+
+Press `Cmd/Ctrl+S` to save the current query:
+
+1. Enter a name for the query
+2. Optionally add a description
+3. Query is saved to your project
+
+### Load saved queries
+
+Access saved queries from the sidebar:
+
+- Click any saved query to load it into the editor
+- Edit and re-save with the same name to update
+- Delete saved queries you no longer need
+
+<Note>
+  Saved queries are stored per-project and sync across your Tusker installation.
+</Note>
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd/Ctrl + Enter` | Execute full query |
+| `Cmd/Ctrl + Shift + Enter` | Execute selection |
+| `Cmd/Ctrl + Shift + F` | Format SQL |
+| `Cmd/Ctrl + S` | Save query |
+| `Ctrl + Space` | Trigger autocomplete |
+| `Cmd/Ctrl + /` | Toggle line comment |
+| `Cmd/Ctrl + F` | Find in query |
+| `Cmd/Ctrl + H` | Find and replace |
+
+## Advanced features
+
+### Multi-cursor editing
+
+Hold `Alt/Option` and click to create multiple cursors, allowing you to edit multiple locations simultaneously.
+
+### Code folding
+
+Click the fold gutter (or press `Cmd/Ctrl + Shift + [`) to collapse code blocks like subqueries or CTEs.
+
+### Search and replace
+
+Press `Cmd/Ctrl+F` for find, `Cmd/Ctrl+H` for find and replace:
+
+- Regex support
+- Case-sensitive option
+- Whole word matching
+- Replace all or one-by-one

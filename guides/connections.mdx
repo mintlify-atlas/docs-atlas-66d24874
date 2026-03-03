@@ -1,0 +1,112 @@
+---
+title: Connection management
+description: Learn how to manage multiple PostgreSQL database connections with SSL support and secure credential storage
+---
+
+## Overview
+
+Tusker supports managing multiple PostgreSQL connections as color-coded projects, allowing you to switch between different databases instantly. Credentials are securely stored in your operating system's keychain for maximum security.
+
+## Managing connections
+
+<Steps>
+  <Step title="Create a new connection">
+    From the sidebar or command palette (`Cmd/Ctrl + K`), select the option to add a new connection. You'll be prompted to enter your database details.
+  </Step>
+  
+  <Step title="Configure connection details">
+    Enter your PostgreSQL connection information:
+    - Host and port
+    - Database name
+    - Username and password
+    - SSL mode (optional)
+  </Step>
+  
+  <Step title="Save and connect">
+    Your credentials will be securely stored in the OS keychain, and Tusker will establish the connection.
+  </Step>
+</Steps>
+
+## SSL support
+
+Tusker provides flexible SSL configuration for secure database connections. You can choose from three SSL modes:
+
+- **Disable** - No SSL encryption (not recommended for production)
+- **Prefer** - Use SSL if available, fall back to unencrypted if not
+- **Require** - Always use SSL, fail if unavailable
+
+<Warning>
+  When connecting to production databases, always use SSL with the "Require" mode to ensure your data is encrypted in transit.
+</Warning>
+
+## Secure credential storage
+
+Tusker stores database passwords in your operating system's native keychain for maximum security:
+
+- **macOS** - Apple Keychain
+- **Windows** - Windows Credential Manager
+- **Linux** - Secret Service API
+
+<Note>
+  Because passwords are stored in the OS keychain, some systems may prompt you to enter your system password or approve keychain access when establishing a connection. This is expected behavior and ensures your credentials remain secure.
+</Note>
+
+### Keychain access prompts
+
+When you first connect to a database, your operating system may ask for permission to store credentials in the keychain. You may also be prompted when Tusker needs to retrieve stored credentials.
+
+On macOS, you might see prompts like:
+- "Tusker wants to access the keychain"
+- Enter your system password to allow access
+
+These prompts are a security feature and help protect your database credentials from unauthorized access.
+
+## Multi-project workflow
+
+### Color-coded projects
+
+Each connection can be assigned a color to help you visually distinguish between different databases. This is especially useful when working with multiple environments (development, staging, production).
+
+### Switching between connections
+
+You can quickly switch between database connections using:
+
+- The sidebar project selector
+- The command palette (`Cmd/Ctrl + K`)
+
+<Info>
+  Tusker performs connection health checks and will automatically attempt to reconnect if a connection is lost.
+</Info>
+
+## Connection health
+
+Tusker continuously monitors connection health and provides visual indicators in the interface. If a connection is lost, Tusker will:
+
+1. Display a warning notification
+2. Attempt to automatically reconnect
+3. Preserve your unsaved changes until the connection is restored
+
+## Managing multiple environments
+
+For teams working with multiple environments, consider this workflow:
+
+<Steps>
+  <Step title="Create separate connections">
+    Set up individual connections for each environment (dev, staging, production)
+  </Step>
+  
+  <Step title="Use color coding">
+    Assign distinct colors to each environment:
+    - Green for development
+    - Yellow for staging
+    - Red for production
+  </Step>
+  
+  <Step title="Use instant mode carefully">
+    Consider disabling instant commit mode for production databases to review all changes before applying them
+  </Step>
+</Steps>
+
+<Warning>
+  Always double-check which connection is active before making changes to avoid accidentally modifying the wrong database.
+</Warning>

@@ -1,0 +1,213 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Tusker database client
+---
+
+## macOS issues
+
+### "App is damaged" warning
+
+When you first try to open Tusker on macOS, you may see a Gatekeeper warning that says:
+
+> "Tusker.app" is damaged and can't be opened. You should move it to the Trash.
+
+This occurs because the app is not code-signed with an Apple Developer certificate.
+
+<Warning>
+  This warning is misleading - the app is not actually damaged. It's a macOS security feature called Gatekeeper that blocks unsigned applications.
+</Warning>
+
+#### Solution 1: Remove quarantine attribute (recommended)
+
+Open Terminal and run:
+
+```bash
+xattr -cr /Applications/Tusker.app
+```
+
+This removes the quarantine attribute that macOS applies to downloaded applications.
+
+#### Solution 2: Use the Gatekeeper bypass
+
+<Steps>
+  <Step title="Right-click the app">
+    In Finder, right-click (or Control-click) on Tusker.app
+  </Step>
+  
+  <Step title="Select Open">
+    Choose "Open" from the context menu
+  </Step>
+  
+  <Step title="Confirm">
+    In the dialog that appears, click "Open" again to confirm you want to run the app
+  </Step>
+</Steps>
+
+<Note>
+  You only need to do this once. After the initial approval, macOS will remember your choice and allow Tusker to launch normally.
+</Note>
+
+### Keychain access prompts
+
+When connecting to a database, macOS may prompt you to enter your system password or grant keychain access.
+
+**Why this happens:**
+
+Tusker stores database passwords in the macOS Keychain for security. The operating system requires explicit permission to access the keychain.
+
+**What to do:**
+
+- Enter your macOS user password when prompted
+- Choose "Always Allow" to avoid repeated prompts for the same connection
+- If you choose "Allow" instead of "Always Allow", you'll be prompted each time Tusker needs to access that credential
+
+<Info>
+  These prompts are a security feature, not a bug. They ensure that only authorized applications can access your stored database credentials.
+</Info>
+
+## Windows issues
+
+### Windows Defender SmartScreen warning
+
+You may see a warning that says:
+
+> Windows protected your PC
+
+This occurs because Tusker is not code-signed with a Windows certificate.
+
+**Solution:**
+
+<Steps>
+  <Step title="Click 'More info'">
+    In the SmartScreen dialog, click the "More info" link
+  </Step>
+  
+  <Step title="Click 'Run anyway'">
+    Click the "Run anyway" button that appears
+  </Step>
+</Steps>
+
+### Credential Manager access
+
+On Windows, Tusker may request access to the Windows Credential Manager to store database passwords securely.
+
+- Grant access when prompted
+- This is required for secure password storage
+
+## Connection issues
+
+### Cannot connect to database
+
+If you're unable to connect to your PostgreSQL database:
+
+<Steps>
+  <Step title="Verify connection details">
+    Double-check your host, port, database name, username, and password
+  </Step>
+  
+  <Step title="Check network access">
+    Ensure your database server is accessible from your machine. Try using `psql` or another PostgreSQL client to verify connectivity
+  </Step>
+  
+  <Step title="Verify PostgreSQL is running">
+    Confirm that PostgreSQL is running on the target server
+  </Step>
+  
+  <Step title="Check firewall rules">
+    Ensure your firewall isn't blocking the PostgreSQL port (default: 5432)
+  </Step>
+</Steps>
+
+### SSL connection failures
+
+If you're having issues with SSL connections:
+
+- Try changing SSL mode from "Require" to "Prefer" to see if the server supports SSL
+- Verify that your PostgreSQL server is configured to accept SSL connections
+- Check that SSL certificates are properly configured on the server
+
+<Warning>
+  Only use "Disable" SSL mode for local development. Never disable SSL for production databases or databases accessible over the internet.
+</Warning>
+
+### Connection drops unexpectedly
+
+If your connection keeps dropping:
+
+- Check your network stability
+- Verify PostgreSQL server settings for connection timeouts
+- Look for firewall or proxy settings that might be terminating idle connections
+
+<Note>
+  Tusker automatically attempts to reconnect when a connection is lost and will preserve your unsaved changes.
+</Note>
+
+## Performance issues
+
+### Slow table loading
+
+If tables are loading slowly:
+
+- Large tables with millions of rows may take time to load the initial page
+- Consider using filters to reduce the result set
+- Check if your database server is under heavy load
+
+### Query execution timeout
+
+If queries are timing out:
+
+- Optimize your SQL queries using indexes and proper WHERE clauses
+- Check for long-running queries blocking your session
+- Increase the query timeout in your PostgreSQL server configuration if needed
+
+## Data editing issues
+
+### Changes not saving
+
+If your changes aren't being saved:
+
+- Check if you have commit mode enabled (not instant mode)
+- Look for staged changes in the Changes tab
+- Verify you have write permissions on the table
+- Check for constraint violations or validation errors
+
+### Cannot edit cells
+
+If you can't edit cells in a table:
+
+- Ensure the table has a primary key (required for updates and deletes)
+- Verify you have UPDATE permissions on the table
+- Check if the column has specific constraints preventing the value you're entering
+
+## Import/export issues
+
+### CSV import fails
+
+If CSV import is failing:
+
+- Verify the CSV file is properly formatted with headers
+- Check for encoding issues (Tusker expects UTF-8)
+- Ensure column types match the data being imported
+- Look for constraint violations in the preview before committing
+
+## Getting help
+
+If you encounter an issue not covered here:
+
+<Steps>
+  <Step title="Check the GitHub issues">
+    Visit the [GitHub repository](https://github.com/18jad/tusker/issues) to see if others have reported the same issue
+  </Step>
+  
+  <Step title="Review the roadmap">
+    Check the [Trello roadmap](https://trello.com/b/fdFwEise/tusker) to see if the feature you need is planned
+  </Step>
+  
+  <Step title="Report the issue">
+    If you've found a bug, open a new issue on GitHub with:
+    - Steps to reproduce the problem
+    - Expected vs actual behavior
+    - Your operating system and Tusker version
+    - Any relevant error messages
+  </Step>
+</Steps>

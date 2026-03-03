@@ -1,0 +1,295 @@
+---
+title: ER diagrams
+description: Visual entity-relationship diagrams with foreign key relationships and interactive schema exploration
+---
+
+Tusker automatically generates interactive entity-relationship (ER) diagrams from your database schema, visualizing tables, columns, and foreign key relationships.
+
+## Opening a diagram
+
+To view the ER diagram for your database:
+
+1. Click the database name in the sidebar
+2. Select **View Diagram** from the context menu
+3. Or right-click a schema and choose **View Diagram** for a single schema
+
+The diagram tab opens with an automatically laid-out visualization of all tables and relationships.
+
+<Info>
+  Diagrams are generated from live database metadata using a single optimized query.
+</Info>
+
+## Diagram elements
+
+### Table nodes
+
+Each table displays as a card showing:
+
+- **Table name** - Displayed in the header
+- **Schema name** - Small label above table name
+- **Column list** - All columns with:
+  - Column name
+  - Data type
+  - Primary key indicator (🔑)
+  - Foreign key indicator (🔗)
+  - Nullable indicator (if NOT NULL)
+  - Unique indicator
+
+**Color coding:**
+- Each schema gets a unique color
+- Table cards use the schema's accent color
+- Edges (relationship lines) match the source schema color
+
+### Relationship edges
+
+Foreign key relationships appear as connecting lines:
+
+- **Solid line** - Foreign key relationship
+- **Arrow direction** - Points from child table to parent table
+- **Color** - Matches source table's schema color
+- **Label** - Shows column names on hover
+
+**Example:**
+```
+[orders] -----> [users]
+  user_id         id
+```
+
+The line indicates `orders.user_id` references `users.id`.
+
+### Schema labels
+
+When multiple schemas are visible, floating labels identify each schema group:
+
+- Positioned near the schema's tables
+- Use the schema's accent color
+- Help orient you in complex diagrams
+
+## Interactions
+
+### Pan and zoom
+
+- **Click and drag** - Pan the canvas
+- **Mouse wheel** - Zoom in and out
+- **Pinch gesture** - Zoom on trackpad
+- **Zoom controls** - Use the +/- buttons in the bottom-right corner
+
+Zoom range: 10% to 200%
+
+### Hover highlighting
+
+Hover over any table to highlight its relationships:
+
+- **Hovered table** - Remains at full opacity
+- **Connected tables** - Remain at full opacity
+- **Unrelated tables** - Fade to 25% opacity
+- **Connected edges** - Remain at full opacity
+- **Unrelated edges** - Fade to 10% opacity
+
+This makes it easy to trace a table's dependencies at a glance.
+
+<Tip>
+  Hover over a table with many relationships to see its entire dependency graph.
+</Tip>
+
+### Click to open table
+
+Click any table node to open it in a new tab:
+
+- Table data view opens
+- Diagram remains open
+- Switch between tabs as needed
+
+### Drag to reposition
+
+Drag any table node to manually reposition it:
+
+- Click and hold the table header
+- Drag to new position
+- Release to drop
+- Layout is preserved during the session
+
+<Note>
+  Manual positions are reset when you close and reopen the diagram.
+</Note>
+
+## Toolbar features
+
+### Search tables
+
+Type in the search box to filter tables:
+
+- Filters by schema-qualified name (`schema.table`)
+- Matching tables remain visible
+- Non-matching tables disappear
+- Connected edges are hidden when both nodes are invisible
+
+Clear the search to show all tables again.
+
+### Schema filters
+
+Click the schema filter dropdown to toggle schemas:
+
+- **Checkboxes** - One per schema
+- **Check/uncheck** - Show/hide that schema's tables
+- **Show All** - Quickly enable all schemas
+
+Hiding a schema:
+- Removes its tables from view
+- Hides edges connecting to those tables
+- Reduces clutter in multi-schema databases
+
+<Accordion title="Example: Focus on core tables">
+  1. Open diagram for entire database
+  2. Uncheck `pg_catalog` and `information_schema`
+  3. Uncheck internal utility schemas
+  4. Only your application schemas remain
+  5. Diagram is cleaner and easier to navigate
+</Accordion>
+
+### Reset layout
+
+Click **Reset Layout** to:
+
+- Recalculate node positions
+- Apply automatic layout algorithm
+- Restore default arrangement
+- Undo any manual repositioning
+
+Useful after:
+- Adding many new tables
+- Manually dragging nodes into a messy arrangement
+- Changing schema filters
+
+### Fit to view
+
+Click **Fit View** to:
+
+- Zoom and pan to show all visible tables
+- Centers the diagram
+- Applies optimal zoom level
+- Useful after filtering or searching
+
+### Export diagram
+
+Export the diagram as an image:
+
+1. Click the **Export** dropdown
+2. Choose **PNG** or **SVG** format
+3. Select save location
+4. Image is rendered at 2x resolution (PNG) or vector (SVG)
+
+**PNG export:**
+- Raster image format
+- 2x resolution for crisp rendering
+- Suitable for presentations and documentation
+- Background color matches your Tusker theme
+
+**SVG export:**
+- Vector image format
+- Scalable to any size without quality loss
+- Editable in design tools (Figma, Illustrator, etc.)
+- Smaller file size for simple diagrams
+
+## Layout algorithm
+
+Tusker uses an automatic layout algorithm optimized for database schemas:
+
+- **Hierarchical layout** - Parent tables toward the top
+- **Minimal edge crossing** - Relationships are clear
+- **Schema grouping** - Tables from the same schema are clustered
+- **Balanced distribution** - Tables spread evenly
+
+The algorithm runs:
+- On initial diagram load
+- When you click "Reset Layout"
+- When you toggle schema visibility
+
+## Minimap
+
+The minimap in the bottom-left corner shows:
+
+- **Overview** - Full diagram at a glance
+- **Viewport indicator** - Your current view
+- **Color-coded nodes** - Matches schema colors
+- **Interactive** - Click to jump to a region
+
+Use the minimap to:
+- Navigate large diagrams quickly
+- See the overall structure
+- Jump to distant table groups
+
+## Performance
+
+### Large schemas
+
+Tusker handles large schemas efficiently:
+
+- **Optimized rendering** - Only visible elements are rendered
+- **Virtual canvas** - Infinite pan and zoom
+- **Lazy edge calculation** - Edges computed as needed
+
+Diagrams with 100+ tables remain responsive.
+
+### Loading time
+
+Diagram generation:
+
+1. **Fetch metadata** - Single optimized query for all schemas
+2. **Build nodes** - Create table cards with column info
+3. **Build edges** - Calculate foreign key connections
+4. **Layout** - Apply automatic positioning
+5. **Render** - Draw on canvas
+
+Typical load time: &lt;2 seconds for 50 tables.
+
+## Use cases
+
+### Understanding database structure
+
+When joining a new project:
+
+1. Open the ER diagram
+2. Identify core entities (tables with many relationships)
+3. Trace foreign key paths
+4. Understand table dependencies
+5. Find junction tables for many-to-many relationships
+
+### Planning queries
+
+Before writing complex JOINs:
+
+1. View the diagram
+2. Trace the relationship path from source to target table
+3. Identify intermediate join tables
+4. Note foreign key column names
+5. Write your query with correct join conditions
+
+### Schema documentation
+
+For documentation and presentations:
+
+1. Export diagram as PNG or SVG
+2. Annotate in design tools if needed
+3. Include in technical documentation
+4. Share with team members
+5. Use in onboarding materials
+
+### Identifying issues
+
+Use diagrams to spot:
+
+- **Missing foreign keys** - Expected relationships not visible
+- **Circular dependencies** - Tables referencing each other
+- **Orphaned tables** - Tables with no relationships
+- **Schema organization** - Tables in wrong schemas
+
+## Future enhancements
+
+Upcoming diagram features:
+
+- **Cardinality indicators** - Show one-to-many, many-to-many
+- **Composite keys** - Support for multi-column primary and foreign keys
+- **Saved layouts** - Persist manual node positions
+- **Annotations** - Add notes and labels to the diagram
+- **Reverse engineering** - Export DDL from diagram

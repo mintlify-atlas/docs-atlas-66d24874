@@ -1,0 +1,223 @@
+---
+title: Development setup
+description: Set up your development environment and build Tusker from source
+---
+
+## Overview
+
+Tusker is built with Tauri 2, React, TypeScript, and Rust. This guide will help you set up your development environment and build the application from source.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+### Required for all platforms
+
+<Steps>
+  <Step title="Install Rust">
+    Download and install Rust from [https://rustup.rs/](https://rustup.rs/)
+    
+    ```bash
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    ```
+  </Step>
+  
+  <Step title="Install Bun">
+    Download and install Bun from [https://bun.sh/](https://bun.sh/)
+    
+    ```bash
+    curl -fsSL https://bun.sh/install | bash
+    ```
+  </Step>
+</Steps>
+
+### Linux-specific dependencies
+
+If you're developing on Linux, you'll also need these system packages:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+  libwebkit2gtk-4.1-dev \
+  libssl-dev \
+  libgtk-3-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev
+```
+
+<Note>
+  The command above is for Debian/Ubuntu-based distributions. For other distributions, consult the Tauri prerequisites documentation for the equivalent packages.
+</Note>
+
+## Getting the source code
+
+Clone the Tusker repository:
+
+```bash
+git clone https://github.com/18jad/tusker.git
+cd tusker
+```
+
+## Installing dependencies
+
+Install all Node.js/JavaScript dependencies:
+
+```bash
+bun install
+```
+
+This will install all packages defined in `package.json`, including:
+
+- **Frontend framework**: React 19 with TypeScript
+- **UI libraries**: Radix UI, Floating UI, Lucide icons
+- **Code editor**: CodeMirror with SQL language support
+- **Data visualization**: XYFlow for schema diagrams
+- **State management**: Zustand
+- **API integration**: Tauri plugins for dialog, filesystem, and updates
+
+<Info>
+  Rust dependencies from `Cargo.toml` are automatically downloaded and compiled when you run the Tauri dev server or build command.
+</Info>
+
+## Running in development mode
+
+Start the development server:
+
+```bash
+bun tauri dev
+```
+
+This command will:
+
+1. Start the Vite development server for the React frontend
+2. Compile the Rust backend
+3. Launch the Tauri application window
+4. Enable hot-reload for frontend changes
+
+<Note>
+  The first run will take several minutes as Cargo downloads and compiles all Rust dependencies. Subsequent runs will be much faster thanks to caching.
+</Note>
+
+## Building for production
+
+To create a production build:
+
+```bash
+bun tauri build
+```
+
+This will:
+
+1. Run TypeScript compilation (`tsc`)
+2. Build the optimized frontend bundle with Vite
+3. Compile the Rust backend in release mode
+4. Package everything into a platform-specific installer
+
+### Build outputs
+
+The build artifacts will be located in:
+
+```
+src-tauri/target/release/bundle/
+```
+
+Platform-specific formats:
+
+- **macOS**: `.dmg` and `.app` files
+- **Windows**: `.exe` and `.msi` installers
+- **Linux**: `.deb`, `.AppImage`, or other formats depending on your configuration
+
+## Project structure
+
+Understanding the codebase structure:
+
+```
+tusker/
+├── src/                    # React/TypeScript frontend
+│   ├── components/         # React components
+│   ├── stores/            # Zustand state management
+│   └── App.tsx            # Main application component
+├── src-tauri/             # Rust backend
+│   ├── src/
+│   │   └── main.rs        # Tauri application entry point
+│   └── Cargo.toml         # Rust dependencies
+├── package.json           # Node.js dependencies and scripts
+└── vite.config.ts         # Vite build configuration
+```
+
+## Key technologies
+
+### Frontend stack
+
+- **React 19** - UI framework
+- **TypeScript** - Type-safe JavaScript
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first styling
+- **CodeMirror** - SQL editor with syntax highlighting
+- **Tauri API** - Bridge to backend functionality
+
+### Backend stack
+
+- **Tauri 2** - Desktop application framework
+- **Rust** - Systems programming language
+- **SQLx** - Async PostgreSQL driver with compile-time query verification
+- **Tokio** - Async runtime
+- **Keyring** - Cross-platform secure credential storage
+- **Rusqlite** - Local SQLite for commit history
+
+## Development tips
+
+<Accordion title="Hot reload behavior">
+  Frontend changes (React/TypeScript) will hot-reload automatically in development mode. Backend changes (Rust) require the Tauri dev server to restart, which happens automatically when you save Rust files.
+</Accordion>
+
+<Accordion title="Debugging">
+  - Use browser DevTools for frontend debugging (right-click in the app and select "Inspect Element")
+  - Use `console.log()` in TypeScript/JavaScript
+  - Use `println!()` or the `log` crate in Rust - output appears in the terminal
+  - Check the Tauri developer console for errors
+</Accordion>
+
+<Accordion title="Database for testing">
+  You'll need a PostgreSQL database to test against. You can:
+  - Install PostgreSQL locally
+  - Use Docker: `docker run -e POSTGRES_PASSWORD=password -p 5432:5432 postgres`
+  - Use a cloud PostgreSQL instance (Supabase, Neon, etc.)
+</Accordion>
+
+## Troubleshooting development issues
+
+### Rust compilation errors
+
+If you encounter Rust compilation errors:
+
+- Ensure you have the latest stable Rust: `rustup update stable`
+- Clear the Cargo cache: `cargo clean`
+- Try rebuilding: `bun tauri dev`
+
+### Bun installation issues
+
+If `bun install` fails:
+
+- Ensure you have the latest Bun version: `bun upgrade`
+- Try removing `node_modules` and `bun.lockb`, then reinstalling
+
+### Missing system dependencies (Linux)
+
+If you see errors about missing libraries:
+
+- Verify all Linux-specific dependencies are installed (see Prerequisites section)
+- Check the Tauri prerequisites guide for your specific distribution
+
+<Warning>
+  Building Tauri applications requires significant system resources. Ensure you have at least 4GB of available RAM and 5GB of free disk space.
+</Warning>
+
+## Next steps
+
+Once you have the development environment set up:
+
+1. Read through the codebase to understand the architecture
+2. Check the [GitHub issues](https://github.com/18jad/tusker/issues) for tasks labeled "good first issue"
+3. Review the [contribution guidelines](/guides/contributing) before making changes
+4. Join discussions on GitHub to connect with other contributors

@@ -1,0 +1,387 @@
+---
+title: Commit commands
+description: Track and manage database change history with Tusker's commit storage system.
+---
+
+## save_commit
+
+Save a commit representing a set of database changes to local storage.
+
+<ParamField body="request" type="SaveCommitCommandRequest" required>
+  Commit details and changes
+  
+  <Expandable title="SaveCommitCommandRequest properties">
+    <ParamField body="project_id" type="string" required>
+      Project identifier (used to isolate commits per database connection)
+    </ParamField>
+    
+    <ParamField body="message" type="string" required>
+      Commit message describing the changes
+    </ParamField>
+    
+    <ParamField body="summary" type="string" required>
+      Brief summary of the commit
+    </ParamField>
+    
+    <ParamField body="changes" type="SaveCommitChange[]" required>
+      Array of individual changes in this commit
+      
+      <Expandable title="SaveCommitChange properties">
+        <ParamField body="type" type="string" required>
+          Change type (e.g., "insert", "update", "delete")
+        </ParamField>
+        
+        <ParamField body="schema_name" type="string" required>
+          Schema where change occurred
+        </ParamField>
+        
+        <ParamField body="table_name" type="string" required>
+          Table where change occurred
+        </ParamField>
+        
+        <ParamField body="data" type="string" required>
+          JSON-serialized new/current row data
+        </ParamField>
+        
+        <ParamField body="original_data" type="string">
+          JSON-serialized original row data (for updates/deletes)
+        </ParamField>
+        
+        <ParamField body="sql" type="string" required>
+          SQL statement that represents this change
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ResponseField name="commit" type="Commit">
+  <Expandable title="Commit properties">
+    <ResponseField name="id" type="string">
+      Unique commit hash (SHA-256)
+    </ResponseField>
+    
+    <ResponseField name="parent_id" type="string | null">
+      Parent commit ID (null for first commit)
+    </ResponseField>
+    
+    <ResponseField name="message" type="string">
+      Commit message
+    </ResponseField>
+    
+    <ResponseField name="summary" type="string">
+      Commit summary
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string">
+      ISO 8601 timestamp when commit was created
+    </ResponseField>
+    
+    <ResponseField name="change_count" type="number">
+      Number of changes in this commit
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```typescript Save insert commit
+import { invoke } from '@tauri-apps/api/tauri';
+
+const commit = await invoke('save_commit', {
+  request: {
+    project_id: 'proj-abc-123',
+    message: 'Add new user account',
+    summary: 'Created user john@example.com',
+    changes: [
+      {
+        type: 'insert',
+        schema_name: 'public',
+        table_name: 'users',
+        data: JSON.stringify({
+          id: 123,
+          email: 'john@example.com',
+          name: 'John Doe',
+          created_at: '2024-01-15T10:30:00Z'
+        }),
+        sql: "INSERT INTO public.users (email, name) VALUES ('john@example.com', 'John Doe')"
+      }
+    ]
+  }
+});
+
+console.log(`Saved commit ${commit.id}`);
+```
+
+```typescript Save update commit
+const commit = await invoke('save_commit', {
+  request: {
+    project_id: 'proj-abc-123',
+    message: 'Update user status',
+    summary: 'Deactivated user account',
+    changes: [
+      {
+        type: 'update',
+        schema_name: 'public',
+        table_name: 'users',
+        data: JSON.stringify({
+          id: 123,
+          is_active: false,
+          updated_at: '2024-01-15T11:00:00Z'
+        }),
+        original_data: JSON.stringify({
+          id: 123,
+          is_active: true,
+          updated_at: '2024-01-15T10:30:00Z'
+        }),
+        sql: "UPDATE public.users SET is_active = false WHERE id = 123"
+      }
+    ]
+  }
+});
+```
+
+```typescript Save multiple changes
+const commit = await invoke('save_commit', {
+  request: {
+    project_id: 'proj-abc-123',
+    message: 'Migrate user data',
+    summary: 'Updated 5 user records',
+    changes: [
+      {
+        type: 'update',
+        schema_name: 'public',
+        table_name: 'users',
+        data: JSON.stringify({ id: 1, role: 'admin' }),
+        original_data: JSON.stringify({ id: 1, role: 'user' }),
+        sql: "UPDATE users SET role = 'admin' WHERE id = 1"
+      },
+      {
+        type: 'update',
+        schema_name: 'public',
+        table_name: 'users',
+        data: JSON.stringify({ id: 2, role: 'admin' }),
+        original_data: JSON.stringify({ id: 2, role: 'user' }),
+        sql: "UPDATE users SET role = 'admin' WHERE id = 2"
+      }
+      // ... more changes
+    ]
+  }
+});
+```
+</CodeGroup>
+
+<Note>
+  Commits are stored in a local SQLite database in the system's data directory. Each project has its own commit database file. The commit ID is a SHA-256 hash of the parent ID, timestamp, and SQL statements.
+</Note>
+
+---
+
+## get_commits
+
+Retrieve all commits for a project, ordered by creation time (newest first).
+
+<ParamField body="project_id" type="string" required>
+  Project identifier
+</ParamField>
+
+<ResponseField name="commits" type="Commit[]">
+  Array of commits for this project
+</ResponseField>
+
+```typescript TypeScript
+const commits = await invoke('get_commits', {
+  projectId: 'proj-abc-123'
+});
+
+commits.forEach(commit => {
+  console.log(`[${commit.created_at}] ${commit.summary}`);
+  console.log(`  ${commit.change_count} changes - ${commit.message}`);
+  console.log(`  Commit ID: ${commit.id}`);
+});
+```
+
+<CodeGroup>
+```typescript Example response
+[
+  {
+    id: "a3f8b2c1e9d4f7b6a2c5e8f1d3b7a9c4e6f2b8d5c3a7e9f4b1d6c2a8e5f3b9",
+    parent_id: "f9b2a3c1e8d4f6b7a5c2e9f1d8b3a7c4e6f2b9d5c8a3e7f4b6d1c9a2e8f5",
+    message: "Update user permissions",
+    summary: "Modified 3 user accounts",
+    created_at: "2024-01-15T14:30:00Z",
+    change_count: 3
+  },
+  {
+    id: "f9b2a3c1e8d4f6b7a5c2e9f1d8b3a7c4e6f2b9d5c8a3e7f4b6d1c9a2e8f5",
+    parent_id: null,
+    message: "Initial data import",
+    summary: "Created user table and imported 100 users",
+    created_at: "2024-01-15T10:00:00Z",
+    change_count: 101
+  }
+]
+```
+</CodeGroup>
+
+---
+
+## get_commit_detail
+
+Retrieve full details of a specific commit including all changes.
+
+<ParamField body="project_id" type="string" required>
+  Project identifier
+</ParamField>
+
+<ParamField body="commit_id" type="string" required>
+  Commit ID (SHA-256 hash)
+</ParamField>
+
+<ResponseField name="detail" type="CommitDetail">
+  <Expandable title="CommitDetail properties">
+    <ResponseField name="commit" type="Commit">
+      Commit metadata
+    </ResponseField>
+    
+    <ResponseField name="changes" type="CommitChange[]">
+      Individual changes in this commit
+      
+      <Expandable title="CommitChange properties">
+        <ResponseField name="id" type="number">
+          Auto-generated change ID
+        </ResponseField>
+        
+        <ResponseField name="commit_id" type="string">
+          Parent commit ID
+        </ResponseField>
+        
+        <ResponseField name="type" type="string">
+          Change type (e.g., "insert", "update", "delete")
+        </ResponseField>
+        
+        <ResponseField name="schema_name" type="string">
+          Schema where change occurred
+        </ResponseField>
+        
+        <ResponseField name="table_name" type="string">
+          Table where change occurred
+        </ResponseField>
+        
+        <ResponseField name="data" type="string">
+          JSON-serialized new/current row data
+        </ResponseField>
+        
+        <ResponseField name="original_data" type="string | null">
+          JSON-serialized original row data (for updates/deletes)
+        </ResponseField>
+        
+        <ResponseField name="sql" type="string">
+          SQL statement representing this change
+        </ResponseField>
+        
+        <ResponseField name="sort_order" type="number">
+          Order of change within commit
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const detail = await invoke('get_commit_detail', {
+  projectId: 'proj-abc-123',
+  commitId: 'a3f8b2c1e9d4f7b6a2c5e8f1d3b7a9c4e6f2b8d5c3a7e9f4b1d6c2a8e5f3b9'
+});
+
+console.log(`Commit: ${detail.commit.message}`);
+console.log(`Created: ${detail.commit.created_at}`);
+console.log(`\nChanges:`);
+
+detail.changes.forEach((change, index) => {
+  console.log(`\n${index + 1}. ${change.type} on ${change.schema_name}.${change.table_name}`);
+  console.log(`   SQL: ${change.sql}`);
+  
+  if (change.original_data) {
+    console.log(`   Before: ${change.original_data}`);
+  }
+  console.log(`   After: ${change.data}`);
+});
+```
+
+<CodeGroup>
+```typescript Example response
+{
+  commit: {
+    id: "a3f8b2c1e9d4f7b6a2c5e8f1d3b7a9c4e6f2b8d5c3a7e9f4b1d6c2a8e5f3b9",
+    parent_id: "f9b2a3c1e8d4f6b7a5c2e9f1d8b3a7c4e6f2b9d5c8a3e7f4b6d1c9a2e8f5",
+    message: "Update user permissions",
+    summary: "Modified 3 user accounts",
+    created_at: "2024-01-15T14:30:00Z",
+    change_count: 3
+  },
+  changes: [
+    {
+      id: 1,
+      commit_id: "a3f8b2c1e9d4f7b6a2c5e8f1d3b7a9c4e6f2b8d5c3a7e9f4b1d6c2a8e5f3b9",
+      type: "update",
+      schema_name: "public",
+      table_name: "users",
+      data: '{"id":1,"role":"admin","updated_at":"2024-01-15T14:30:00Z"}',
+      original_data: '{"id":1,"role":"user","updated_at":"2024-01-15T10:00:00Z"}',
+      sql: "UPDATE public.users SET role = 'admin' WHERE id = 1",
+      sort_order: 0
+    },
+    {
+      id: 2,
+      commit_id: "a3f8b2c1e9d4f7b6a2c5e8f1d3b7a9c4e6f2b8d5c3a7e9f4b1d6c2a8e5f3b9",
+      type: "update",
+      schema_name: "public",
+      table_name: "users",
+      data: '{"id":2,"role":"admin","updated_at":"2024-01-15T14:30:00Z"}',
+      original_data: '{"id":2,"role":"user","updated_at":"2024-01-15T10:00:00Z"}',
+      sql: "UPDATE public.users SET role = 'admin' WHERE id = 2",
+      sort_order: 1
+    },
+    {
+      id: 3,
+      commit_id: "a3f8b2c1e9d4f7b6a2c5e8f1d3b7a9c4e6f2b8d5c3a7e9f4b1d6c2a8e5f3b9",
+      type: "update",
+      schema_name: "public",
+      table_name: "users",
+      data: '{"id":3,"role":"admin","updated_at":"2024-01-15T14:30:00Z"}',
+      original_data: '{"id":3,"role":"user","updated_at":"2024-01-15T10:00:00Z"}',
+      sql: "UPDATE public.users SET role = 'admin' WHERE id = 3",
+      sort_order: 2
+    }
+  ]
+}
+```
+</CodeGroup>
+
+---
+
+## Storage location
+
+Commits are stored in SQLite databases on the local filesystem:
+
+<Tabs>
+  <Tab title="macOS">
+    ```
+    ~/Library/Application Support/com.tusker.app/commits/<project_id>.db
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    ```
+    C:\Users\<username>\AppData\Roaming\com.tusker.app\commits\<project_id>.db
+    ```
+  </Tab>
+  
+  <Tab title="Linux">
+    ```
+    ~/.local/share/com.tusker.app/commits/<project_id>.db
+    ```
+  </Tab>
+</Tabs>
+
+Each project has its own database file to keep commit histories isolated.

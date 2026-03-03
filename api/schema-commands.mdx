@@ -1,0 +1,458 @@
+---
+title: Schema commands
+description: Introspect PostgreSQL database schemas, tables, columns, indexes, and constraints using Tusker's schema inspection commands.
+---
+
+## get_schemas
+
+Retrieve all non-system schemas in the database.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ResponseField name="schemas" type="SchemaInfo[]">
+  <Expandable title="SchemaInfo properties">
+    <ResponseField name="name" type="string">
+      Schema name
+    </ResponseField>
+    
+    <ResponseField name="owner" type="string | null">
+      Schema owner username
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+import { invoke } from '@tauri-apps/api/tauri';
+
+const schemas = await invoke('get_schemas', {
+  connectionId: 'abc-123'
+});
+
+schemas.forEach(schema => {
+  console.log(`${schema.name} (owned by ${schema.owner})`);
+});
+```
+
+<Note>
+  System schemas like `pg_catalog`, `information_schema`, and `pg_toast` are automatically excluded.
+</Note>
+
+---
+
+## get_schemas_with_tables
+
+Retrieve all schemas with their tables in a single optimized operation.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ResponseField name="schemas" type="SchemaWithTables[]">
+  <Expandable title="SchemaWithTables properties">
+    <ResponseField name="name" type="string">
+      Schema name
+    </ResponseField>
+    
+    <ResponseField name="owner" type="string | null">
+      Schema owner username
+    </ResponseField>
+    
+    <ResponseField name="tables" type="TableInfo[]">
+      Tables within this schema
+      
+      <Expandable title="TableInfo properties">
+        <ResponseField name="schema" type="string">
+          Schema name
+        </ResponseField>
+        
+        <ResponseField name="name" type="string">
+          Table name
+        </ResponseField>
+        
+        <ResponseField name="table_type" type="TableType">
+          Type: `table`, `view`, `materialized_view`, or `foreign_table`
+        </ResponseField>
+        
+        <ResponseField name="estimated_row_count" type="number | null">
+          Estimated number of rows (from pg_class.reltuples)
+        </ResponseField>
+        
+        <ResponseField name="description" type="string | null">
+          Table comment/description
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const schemasWithTables = await invoke('get_schemas_with_tables', {
+  connectionId: 'abc-123'
+});
+
+schemasWithTables.forEach(schema => {
+  console.log(`Schema: ${schema.name}`);
+  schema.tables.forEach(table => {
+    console.log(`  - ${table.name} (${table.table_type})`);
+  });
+});
+```
+
+<Note>
+  This command uses optimized queries to fetch all data in fewer round trips, making it faster than calling `get_schemas` and `get_tables` separately for each schema.
+</Note>
+
+---
+
+## get_tables
+
+Get all tables in a specific schema.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name to query
+</ParamField>
+
+<ResponseField name="tables" type="TableInfo[]">
+  List of tables in the schema
+</ResponseField>
+
+```typescript TypeScript
+const tables = await invoke('get_tables', {
+  connectionId: 'abc-123',
+  schema: 'public'
+});
+```
+
+---
+
+## get_columns
+
+Retrieve detailed column information for a table.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ResponseField name="columns" type="ColumnInfo[]">
+  <Expandable title="ColumnInfo properties">
+    <ResponseField name="name" type="string">
+      Column name
+    </ResponseField>
+    
+    <ResponseField name="data_type" type="string">
+      Full data type with modifiers (e.g., "character varying(255)")
+    </ResponseField>
+    
+    <ResponseField name="udt_name" type="string">
+      Underlying data type name (e.g., "varchar")
+    </ResponseField>
+    
+    <ResponseField name="is_nullable" type="boolean">
+      Whether column accepts NULL values
+    </ResponseField>
+    
+    <ResponseField name="is_primary_key" type="boolean">
+      Whether column is part of primary key
+    </ResponseField>
+    
+    <ResponseField name="is_unique" type="boolean">
+      Whether column has a unique constraint
+    </ResponseField>
+    
+    <ResponseField name="is_foreign_key" type="boolean">
+      Whether column is a foreign key
+    </ResponseField>
+    
+    <ResponseField name="default_value" type="string | null">
+      Column default value expression
+    </ResponseField>
+    
+    <ResponseField name="character_maximum_length" type="number | null">
+      Maximum length for character types
+    </ResponseField>
+    
+    <ResponseField name="numeric_precision" type="number | null">
+      Precision for numeric types
+    </ResponseField>
+    
+    <ResponseField name="numeric_scale" type="number | null">
+      Scale for numeric types
+    </ResponseField>
+    
+    <ResponseField name="ordinal_position" type="number">
+      Position of column in table
+    </ResponseField>
+    
+    <ResponseField name="description" type="string | null">
+      Column comment/description
+    </ResponseField>
+    
+    <ResponseField name="foreign_key_info" type="ForeignKeyInfo | null">
+      Foreign key relationship details
+      
+      <Expandable title="ForeignKeyInfo properties">
+        <ResponseField name="constraint_name" type="string">
+          Name of the foreign key constraint
+        </ResponseField>
+        
+        <ResponseField name="referenced_schema" type="string">
+          Referenced table's schema
+        </ResponseField>
+        
+        <ResponseField name="referenced_table" type="string">
+          Referenced table name
+        </ResponseField>
+        
+        <ResponseField name="referenced_column" type="string">
+          Referenced column name
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="enum_values" type="string[] | null">
+      Possible values for enum types
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const columns = await invoke('get_columns', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users'
+});
+
+columns.forEach(col => {
+  console.log(`${col.name}: ${col.data_type}`);
+  if (col.is_primary_key) console.log('  PRIMARY KEY');
+  if (col.foreign_key_info) {
+    console.log(`  FK -> ${col.foreign_key_info.referenced_table}.${col.foreign_key_info.referenced_column}`);
+  }
+});
+```
+
+---
+
+## get_all_columns
+
+Retrieve columns for all tables across multiple schemas in a single query.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schemas" type="string[]" required>
+  Array of schema names to query
+</ParamField>
+
+<ResponseField name="tables" type="TableColumnsInfo[]">
+  <Expandable title="TableColumnsInfo properties">
+    <ResponseField name="schema" type="string">
+      Schema name
+    </ResponseField>
+    
+    <ResponseField name="table" type="string">
+      Table name
+    </ResponseField>
+    
+    <ResponseField name="columns" type="ColumnInfo[]">
+      Array of column information
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const allColumns = await invoke('get_all_columns', {
+  connectionId: 'abc-123',
+  schemas: ['public', 'auth', 'analytics']
+});
+
+allColumns.forEach(tableInfo => {
+  console.log(`${tableInfo.schema}.${tableInfo.table}:`);
+  tableInfo.columns.forEach(col => {
+    console.log(`  ${col.name}: ${col.data_type}`);
+  });
+});
+```
+
+<Note>
+  This command is optimized to fetch all column information in a single database query, avoiding N+1 query problems when loading multiple tables.
+</Note>
+
+---
+
+## get_row_count
+
+Get the exact row count for a table.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ResponseField name="count" type="number">
+  Exact number of rows in the table
+</ResponseField>
+
+```typescript TypeScript
+const count = await invoke('get_row_count', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users'
+});
+
+console.log(`Table has ${count} rows`);
+```
+
+<Note>
+  This executes `SELECT COUNT(*)` which can be slow on large tables. For estimates, use the `estimated_row_count` from `get_tables` instead.
+</Note>
+
+---
+
+## get_indexes
+
+Retrieve index information for a table.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ResponseField name="indexes" type="IndexInfo[]">
+  <Expandable title="IndexInfo properties">
+    <ResponseField name="name" type="string">
+      Index name
+    </ResponseField>
+    
+    <ResponseField name="is_unique" type="boolean">
+      Whether index enforces uniqueness
+    </ResponseField>
+    
+    <ResponseField name="is_primary" type="boolean">
+      Whether this is the primary key index
+    </ResponseField>
+    
+    <ResponseField name="columns" type="string[]">
+      Columns included in the index (in order)
+    </ResponseField>
+    
+    <ResponseField name="index_type" type="string">
+      Index access method (e.g., "btree", "hash", "gin", "gist")
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const indexes = await invoke('get_indexes', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users'
+});
+
+indexes.forEach(idx => {
+  console.log(`${idx.name} (${idx.index_type})`);
+  console.log(`  Columns: ${idx.columns.join(', ')}`);
+  if (idx.is_unique) console.log('  UNIQUE');
+});
+```
+
+---
+
+## get_constraints
+
+Retrieve constraint information for a table.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ResponseField name="constraints" type="ConstraintInfo[]">
+  <Expandable title="ConstraintInfo properties">
+    <ResponseField name="name" type="string">
+      Constraint name
+    </ResponseField>
+    
+    <ResponseField name="constraint_type" type="ConstraintType">
+      Type: `primary_key`, `foreign_key`, `unique`, `check`, or `exclusion`
+    </ResponseField>
+    
+    <ResponseField name="columns" type="string[]">
+      Columns involved in the constraint
+    </ResponseField>
+    
+    <ResponseField name="definition" type="string | null">
+      Full constraint definition SQL
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const constraints = await invoke('get_constraints', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users'
+});
+
+constraints.forEach(constraint => {
+  console.log(`${constraint.name} (${constraint.constraint_type})`);
+  console.log(`  Columns: ${constraint.columns.join(', ')}`);
+  if (constraint.definition) {
+    console.log(`  Definition: ${constraint.definition}`);
+  }
+});
+```
+
+---
+
+## Type definitions
+
+<CodeGroup>
+```typescript TableType
+type TableType = 'table' | 'view' | 'materialized_view' | 'foreign_table';
+```
+
+```typescript ConstraintType
+type ConstraintType = 'primary_key' | 'foreign_key' | 'unique' | 'check' | 'exclusion';
+```
+
+```typescript SslMode
+type SslMode = 'disable' | 'prefer' | 'require';
+```
+</CodeGroup>

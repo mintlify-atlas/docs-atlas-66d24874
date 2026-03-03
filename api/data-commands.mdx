@@ -1,0 +1,594 @@
+---
+title: Data commands
+description: Execute queries and perform CRUD operations on PostgreSQL data with Tusker's data manipulation commands.
+---
+
+## fetch_table_data
+
+Retrieve paginated data from a table with optional filtering and sorting.
+
+<ParamField body="request" type="FetchDataRequest" required>
+  Table data query configuration
+  
+  <Expandable title="FetchDataRequest properties">
+    <ParamField body="connection_id" type="string" required>
+      Active connection identifier
+    </ParamField>
+    
+    <ParamField body="schema" type="string" required>
+      Schema name
+    </ParamField>
+    
+    <ParamField body="table" type="string" required>
+      Table name
+    </ParamField>
+    
+    <ParamField body="page" type="number" default="1">
+      Page number (1-based)
+    </ParamField>
+    
+    <ParamField body="page_size" type="number" default="50">
+      Number of rows per page
+    </ParamField>
+    
+    <ParamField body="order_by" type="string[]">
+      Columns to sort by
+    </ParamField>
+    
+    <ParamField body="order_direction" type="string[]">
+      Sort directions ("ASC" or "DESC") corresponding to order_by columns
+    </ParamField>
+    
+    <ParamField body="filters" type="FilterCondition[]">
+      Filter conditions to apply
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ResponseField name="result" type="PaginatedResult">
+  <Expandable title="PaginatedResult properties">
+    <ResponseField name="rows" type="Record<string, any>[]">
+      Array of row objects with column names as keys
+    </ResponseField>
+    
+    <ResponseField name="total_count" type="number">
+      Total number of rows matching filters
+    </ResponseField>
+    
+    <ResponseField name="page" type="number">
+      Current page number
+    </ResponseField>
+    
+    <ResponseField name="page_size" type="number">
+      Rows per page
+    </ResponseField>
+    
+    <ResponseField name="total_pages" type="number">
+      Total number of pages
+    </ResponseField>
+    
+    <ResponseField name="columns" type="ColumnMeta[]">
+      Column metadata
+      
+      <Expandable title="ColumnMeta properties">
+        <ResponseField name="name" type="string">
+          Column name
+        </ResponseField>
+        
+        <ResponseField name="data_type" type="string">
+          PostgreSQL data type
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```typescript Basic pagination
+import { invoke } from '@tauri-apps/api/tauri';
+
+const result = await invoke('fetch_table_data', {
+  request: {
+    connection_id: 'abc-123',
+    schema: 'public',
+    table: 'users',
+    page: 1,
+    page_size: 50
+  }
+});
+
+console.log(`Showing ${result.rows.length} of ${result.total_count} rows`);
+```
+
+```typescript With sorting
+const result = await invoke('fetch_table_data', {
+  request: {
+    connection_id: 'abc-123',
+    schema: 'public',
+    table: 'users',
+    page: 1,
+    order_by: ['created_at', 'email'],
+    order_direction: ['DESC', 'ASC']
+  }
+});
+```
+
+```typescript With filters
+const result = await invoke('fetch_table_data', {
+  request: {
+    connection_id: 'abc-123',
+    schema: 'public',
+    table: 'users',
+    page: 1,
+    filters: [
+      {
+        column: 'email',
+        operator: 'contains',
+        value: '@example.com'
+      },
+      {
+        column: 'is_active',
+        operator: 'is_true'
+      }
+    ]
+  }
+});
+```
+</CodeGroup>
+
+<Note>
+  If no `order_by` is specified, results are automatically sorted by the primary key if one exists.
+</Note>
+
+---
+
+## Filter operators
+
+<ParamField body="FilterCondition" type="object">
+  <Expandable title="properties">
+    <ParamField body="column" type="string" required>
+      Column name to filter on
+    </ParamField>
+    
+    <ParamField body="operator" type="FilterOperator" required>
+      Comparison operator
+    </ParamField>
+    
+    <ParamField body="value" type="string">
+      Filter value (required for most operators)
+    </ParamField>
+    
+    <ParamField body="value2" type="string">
+      Second value (required for `between` operator)
+    </ParamField>
+    
+    <ParamField body="values" type="string[]">
+      Array of values (required for `in` operator)
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<Tabs>
+  <Tab title="Comparison">
+    - `equals` - Exact match
+    - `not_equals` - Not equal to
+    - `greater_than` - Greater than
+    - `less_than` - Less than
+    - `greater_than_or_equal` - Greater than or equal
+    - `less_than_or_equal` - Less than or equal
+  </Tab>
+  
+  <Tab title="String">
+    - `contains` - Case-insensitive substring match
+    - `not_contains` - Does not contain substring
+    - `starts_with` - Starts with string
+    - `ends_with` - Ends with string
+  </Tab>
+  
+  <Tab title="Null/Boolean">
+    - `is_null` - Column is NULL
+    - `is_not_null` - Column is not NULL
+    - `is_true` - Boolean column is true
+    - `is_false` - Boolean column is false
+  </Tab>
+  
+  <Tab title="Advanced">
+    - `between` - Value between two values (requires `value` and `value2`)
+    - `in` - Value in array (requires `values`)
+  </Tab>
+</Tabs>
+
+---
+
+## execute_query
+
+Execute a raw SQL query.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="sql" type="string" required>
+  SQL query to execute
+</ParamField>
+
+<ResponseField name="result" type="QueryResult">
+  <Expandable title="QueryResult properties">
+    <ResponseField name="rows" type="Record<string, any>[]">
+      Query result rows (empty for non-SELECT queries)
+    </ResponseField>
+    
+    <ResponseField name="columns" type="ColumnMeta[]">
+      Column metadata (empty for non-SELECT queries)
+    </ResponseField>
+    
+    <ResponseField name="rows_affected" type="number">
+      Number of rows affected (for INSERT/UPDATE/DELETE)
+    </ResponseField>
+    
+    <ResponseField name="execution_time_ms" type="number">
+      Query execution time in milliseconds
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```typescript SELECT query
+const result = await invoke('execute_query', {
+  connectionId: 'abc-123',
+  sql: 'SELECT * FROM users WHERE created_at > NOW() - INTERVAL \'7 days\''
+});
+
+console.log(`Query returned ${result.rows.length} rows in ${result.execution_time_ms}ms`);
+```
+
+```typescript Mutation query
+const result = await invoke('execute_query', {
+  connectionId: 'abc-123',
+  sql: 'UPDATE users SET last_login = NOW() WHERE id = 123'
+});
+
+console.log(`Updated ${result.rows_affected} rows`);
+```
+</CodeGroup>
+
+<Note>
+  The command automatically detects whether the query is a SELECT (returns rows) or a mutation (returns affected row count).
+</Note>
+
+---
+
+## insert_row
+
+Insert a single row into a table.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ParamField body="data" type="Record<string, any>" required>
+  Column-value pairs to insert
+</ParamField>
+
+<ResponseField name="row" type="Record<string, any>">
+  The inserted row with all columns (including defaults and generated values)
+</ResponseField>
+
+```typescript TypeScript
+const newUser = await invoke('insert_row', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users',
+  data: {
+    email: 'user@example.com',
+    name: 'John Doe',
+    is_active: true
+  }
+});
+
+console.log(`Created user with ID: ${newUser.id}`);
+```
+
+<Note>
+  The command uses `RETURNING *` to return the complete inserted row, including auto-generated values like IDs and timestamps.
+</Note>
+
+---
+
+## bulk_insert
+
+Insert multiple rows in a single transaction.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ParamField body="rows" type="Record<string, any>[]" required>
+  Array of row objects to insert
+</ParamField>
+
+<ResponseField name="count" type="number">
+  Number of rows inserted
+</ResponseField>
+
+```typescript TypeScript
+const count = await invoke('bulk_insert', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users',
+  rows: [
+    { email: 'user1@example.com', name: 'User One' },
+    { email: 'user2@example.com', name: 'User Two' },
+    { email: 'user3@example.com', name: 'User Three' }
+  ]
+});
+
+console.log(`Inserted ${count} rows`);
+```
+
+<Note>
+  All rows must have the same columns. The columns are determined from the first row in the array.
+</Note>
+
+---
+
+## update_row
+
+Update rows in a table matching a WHERE clause.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ParamField body="data" type="Record<string, any>" required>
+  Column-value pairs to update
+</ParamField>
+
+<ParamField body="where_clause" type="Record<string, any>" required>
+  Column-value pairs for WHERE clause (all conditions are AND'ed)
+</ParamField>
+
+<ResponseField name="count" type="number">
+  Number of rows updated
+</ResponseField>
+
+```typescript TypeScript
+const count = await invoke('update_row', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users',
+  data: {
+    is_active: false,
+    deactivated_at: new Date().toISOString()
+  },
+  whereClause: {
+    id: 123
+  }
+});
+
+console.log(`Updated ${count} rows`);
+```
+
+---
+
+## delete_row
+
+Delete rows from a table matching a WHERE clause.
+
+<ParamField body="connection_id" type="string" required>
+  Active connection identifier
+</ParamField>
+
+<ParamField body="schema" type="string" required>
+  Schema name
+</ParamField>
+
+<ParamField body="table" type="string" required>
+  Table name
+</ParamField>
+
+<ParamField body="where_clause" type="Record<string, any>" required>
+  Column-value pairs for WHERE clause (all conditions are AND'ed)
+</ParamField>
+
+<ResponseField name="count" type="number">
+  Number of rows deleted
+</ResponseField>
+
+```typescript TypeScript
+const count = await invoke('delete_row', {
+  connectionId: 'abc-123',
+  schema: 'public',
+  table: 'users',
+  whereClause: {
+    id: 123,
+    is_active: false
+  }
+});
+
+console.log(`Deleted ${count} rows`);
+```
+
+<Note>
+  A WHERE clause is required to prevent accidental deletion of all rows. If you need to delete all rows, use `execute_query` with a `DELETE` statement instead.
+</Note>
+
+---
+
+## execute_migration
+
+Execute multiple SQL statements as a migration with validation and rollback support.
+
+<ParamField body="request" type="MigrationRequest" required>
+  Migration configuration
+  
+  <Expandable title="MigrationRequest properties">
+    <ParamField body="connection_id" type="string" required>
+      Active connection identifier
+    </ParamField>
+    
+    <ParamField body="statements" type="string[]" required>
+      Array of SQL statements to execute
+    </ParamField>
+    
+    <ParamField body="dry_run" type="boolean" required>
+      If true, validate statements but roll back transaction
+    </ParamField>
+    
+    <ParamField body="lock_timeout_ms" type="number" default="5000">
+      Maximum time to wait for locks (milliseconds)
+    </ParamField>
+    
+    <ParamField body="statement_timeout_ms" type="number" default="30000">
+      Maximum execution time per statement (milliseconds)
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ResponseField name="result" type="MigrationResult">
+  <Expandable title="MigrationResult properties">
+    <ResponseField name="ok" type="boolean">
+      Whether all statements succeeded
+    </ResponseField>
+    
+    <ResponseField name="dry_run" type="boolean">
+      Whether this was a dry run
+    </ResponseField>
+    
+    <ResponseField name="committed" type="boolean">
+      Whether changes were committed to the database
+    </ResponseField>
+    
+    <ResponseField name="duration_ms" type="number">
+      Total execution time in milliseconds
+    </ResponseField>
+    
+    <ResponseField name="statements" type="StatementResult[]">
+      Individual statement results
+      
+      <Expandable title="StatementResult properties">
+        <ResponseField name="sql" type="string">
+          SQL statement
+        </ResponseField>
+        
+        <ResponseField name="ok" type="boolean">
+          Whether statement succeeded
+        </ResponseField>
+        
+        <ResponseField name="duration_ms" type="number">
+          Statement execution time
+        </ResponseField>
+        
+        <ResponseField name="rows_affected" type="number | null">
+          Rows affected (null on error)
+        </ResponseField>
+        
+        <ResponseField name="error" type="StatementError | null">
+          Error details if statement failed
+          
+          <Expandable title="StatementError properties">
+            <ResponseField name="code" type="string | null">
+              PostgreSQL error code
+            </ResponseField>
+            
+            <ResponseField name="message" type="string">
+              Error message
+            </ResponseField>
+            
+            <ResponseField name="detail" type="string | null">
+              Additional error details
+            </ResponseField>
+            
+            <ResponseField name="hint" type="string | null">
+              Suggested fix
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="lock_timeout_ms" type="number">
+      Lock timeout used
+    </ResponseField>
+    
+    <ResponseField name="statement_timeout_ms" type="number">
+      Statement timeout used
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```typescript Dry run validation
+const result = await invoke('execute_migration', {
+  request: {
+    connection_id: 'abc-123',
+    statements: [
+      'CREATE TABLE products (id SERIAL PRIMARY KEY, name TEXT NOT NULL)',
+      'CREATE INDEX idx_products_name ON products(name)',
+      'ALTER TABLE orders ADD COLUMN product_id INTEGER REFERENCES products(id)'
+    ],
+    dry_run: true
+  }
+});
+
+if (result.ok) {
+  console.log('Migration validated successfully');
+} else {
+  result.statements.forEach(stmt => {
+    if (!stmt.ok) {
+      console.error(`Error in: ${stmt.sql}`);
+      console.error(stmt.error.message);
+    }
+  });
+}
+```
+
+```typescript Apply migration
+const result = await invoke('execute_migration', {
+  request: {
+    connection_id: 'abc-123',
+    statements: [
+      'ALTER TABLE users ADD COLUMN last_login TIMESTAMPTZ',
+      'CREATE INDEX idx_users_last_login ON users(last_login)'
+    ],
+    dry_run: false,
+    lock_timeout_ms: 10000,
+    statement_timeout_ms: 60000
+  }
+});
+
+if (result.committed) {
+  console.log(`Migration applied in ${result.duration_ms}ms`);
+}
+```
+</CodeGroup>
+
+<Note>
+  In dry run mode, statements are validated using savepoints. Each statement's side effects are preserved during validation so that subsequent statements see the changes (e.g., a RENAME TABLE followed by an ALTER on the new name). The entire transaction is rolled back at the end.
+  
+  In apply mode, the migration stops at the first error and rolls back the entire transaction.
+</Note>

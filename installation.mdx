@@ -1,0 +1,120 @@
+---
+title: Installation
+description: Download and install Tusker on macOS and Windows
+---
+
+## Download Tusker
+
+Download the latest release from the [GitHub Releases page](https://github.com/18jad/tusker/releases/latest).
+
+| Platform | Format |
+|----------|--------|
+| **macOS** (Apple Silicon) | `.dmg` |
+| **Windows** | `.exe` / `.msi` |
+
+## Installation by platform
+
+<Tabs>
+  <Tab title="macOS">
+    ### Install on macOS
+
+    <Steps>
+      <Step title="Download the DMG file">
+        Download the `.dmg` file for Apple Silicon from the [Releases page](https://github.com/18jad/tusker/releases/latest).
+      </Step>
+      
+      <Step title="Open the DMG">
+        Double-click the downloaded `.dmg` file to mount it.
+      </Step>
+      
+      <Step title="Drag to Applications">
+        Drag the Tusker app to your Applications folder.
+      </Step>
+      
+      <Step title="Launch Tusker">
+        Open Tusker from your Applications folder.
+      </Step>
+    </Steps>
+
+    ### macOS Gatekeeper warning
+
+    <Warning>
+      The app is not code-signed with an Apple Developer certificate. You may see a warning that says "Tusker is damaged and can't be opened."
+    </Warning>
+
+    <img width="270" height="280" alt="Gatekeeper warning" src="https://github.com/user-attachments/assets/eb29e46f-2efe-4609-a66d-d38f64da68fd" />
+
+    **Solution 1: Remove the quarantine attribute**
+
+    Open Terminal and run:
+
+    ```bash
+    xattr -cr /Applications/Tusker.app
+    ```
+
+    **Solution 2: Override Gatekeeper**
+
+    <Steps>
+      <Step title="Right-click the app">
+        Right-click (or Control+click) on Tusker.app in your Applications folder.
+      </Step>
+      
+      <Step title="Select Open">
+        Select **Open** from the context menu.
+      </Step>
+      
+      <Step title="Confirm">
+        Click **Open** again in the confirmation dialog.
+      </Step>
+    </Steps>
+
+    <Info>
+      You only need to do this once. After the first launch, you can open Tusker normally.
+    </Info>
+  </Tab>
+  
+  <Tab title="Windows">
+    ### Install on Windows
+
+    <Steps>
+      <Step title="Download the installer">
+        Download either the `.exe` or `.msi` installer from the [Releases page](https://github.com/18jad/tusker/releases/latest).
+      </Step>
+      
+      <Step title="Run the installer">
+        Double-click the downloaded installer file.
+      </Step>
+      
+      <Step title="Follow the installation wizard">
+        Follow the on-screen instructions to complete the installation.
+      </Step>
+      
+      <Step title="Launch Tusker">
+        Open Tusker from the Start menu or desktop shortcut.
+      </Step>
+    </Steps>
+
+    <Info>
+      Windows may display a SmartScreen warning for unsigned applications. Click "More info" and then "Run anyway" to proceed with the installation.
+    </Info>
+  </Tab>
+</Tabs>
+
+## System requirements
+
+- **macOS**: Apple Silicon (M1, M2, M3, or later)
+- **Windows**: Windows 10 or later (64-bit)
+
+## Security & credentials
+
+<Note>
+  Tusker stores database passwords securely in your operating system's keychain:
+  - **macOS**: Keychain Access
+  - **Windows**: Windows Credential Manager
+  
+  You may be prompted to enter your system password or approve keychain access when connecting to a database. This is expected behavior.
+</Note>
+
+## Next steps
+
+After installing Tusker, continue to the [quick start guide](/quickstart) to connect to your first PostgreSQL database.

@@ -1,0 +1,114 @@
+---
+title: Keyboard shortcuts
+description: Complete reference for all keyboard shortcuts available in Tusker
+---
+
+## Overview
+
+Tusker provides comprehensive keyboard shortcuts to help you navigate and work efficiently without reaching for your mouse.
+
+<Note>
+  On macOS, use `Cmd` for all shortcuts listed with `Cmd/Ctrl`. On Windows and Linux, use `Ctrl` instead.
+</Note>
+
+## Global shortcuts
+
+These shortcuts work throughout the application:
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd/Ctrl + K` | Open command palette |
+| `Cmd/Ctrl + B` | Toggle sidebar visibility |
+| `Cmd/Ctrl + W` | Close active tab |
+| `Escape` | Close modals and popovers |
+
+## Navigation shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd/Ctrl + N` | Create new table |
+| `Cmd/Ctrl + T` | Open new query tab |
+
+## Table and data editing
+
+| Shortcut | Action |
+|----------|--------|
+| `Double-click` | Edit cell inline |
+| `Shift + Click` | Multi-select rows or add secondary sort column |
+
+<Info>
+  When multi-selecting rows with `Shift + Click`, you can select a range from the first clicked row to the current row. Use `Cmd/Ctrl + Click` to select individual non-consecutive rows.
+</Info>
+
+## SQL editor shortcuts
+
+When working in the SQL Playground:
+
+| Shortcut | Action |
+|----------|--------|
+| `Cmd/Ctrl + Enter` | Execute current query |
+
+<Note>
+  The SQL editor is powered by CodeMirror and supports all standard CodeMirror keyboard shortcuts for text editing, including multi-cursor editing.
+</Note>
+
+## Row selection
+
+Tusker supports two types of row selection:
+
+<Accordion title="Range selection with Shift + Click">
+  Click a row, then hold `Shift` and click another row to select all rows between them. This is useful for bulk operations like deleting multiple consecutive rows.
+</Accordion>
+
+<Accordion title="Multiple selection with Cmd/Ctrl + Click">
+  Hold `Cmd` (macOS) or `Ctrl` (Windows/Linux) and click individual rows to add them to your selection. This allows you to select non-consecutive rows for bulk operations.
+</Accordion>
+
+## Column sorting
+
+Tusker supports multi-column sorting with keyboard modifiers:
+
+- **Click** a column header to sort by that column
+- **Shift + Click** additional column headers to add secondary, tertiary, and further sort levels
+
+<Info>
+  Sort direction, order, and state are automatically persisted per table across sessions.
+</Info>
+
+## Modal and popover control
+
+Press `Escape` to close:
+- Cell edit modals
+- Row detail modals
+- Filter builders
+- Any open popovers or dropdowns
+
+## Command palette
+
+The command palette (`Cmd/Ctrl + K`) provides quick access to:
+
+- Switch between database connections
+- Navigate to tables and views
+- Create new tables or queries
+- Access recently used items
+- Execute common actions
+
+<Note>
+  The command palette is searchable - just start typing to filter available commands.
+</Note>
+
+## Tips for efficiency
+
+<Steps>
+  <Step title="Master the command palette">
+    `Cmd/Ctrl + K` is your most powerful shortcut. Use it to quickly navigate between tables, switch connections, and execute commands without using the mouse.
+  </Step>
+  
+  <Step title="Use multi-select for bulk operations">
+    Combine `Shift + Click` and `Cmd/Ctrl + Click` to efficiently select multiple rows for bulk deletion or editing.
+  </Step>
+  
+  <Step title="Toggle the sidebar">
+    When you need more screen space for your data, use `Cmd/Ctrl + B` to hide the sidebar. Press it again to bring it back.
+  </Step>
+</Steps>

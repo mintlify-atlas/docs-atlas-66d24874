@@ -1,0 +1,440 @@
+---
+title: Connection commands
+description: Manage database connections with Tusker's Tauri backend commands for connecting, disconnecting, testing connections, and managing saved credentials.
+---
+
+## connect
+
+Establish a new database connection.
+
+<ParamField body="request" type="ConnectRequest" required>
+  Connection configuration and credentials
+  
+  <Expandable title="ConnectRequest properties">
+    <ParamField body="name" type="string" required>
+      Display name for this connection
+    </ParamField>
+    
+    <ParamField body="host" type="string" required>
+      Database host address
+    </ParamField>
+    
+    <ParamField body="port" type="number" required>
+      Database port (typically 5432 for PostgreSQL)
+    </ParamField>
+    
+    <ParamField body="database" type="string" required>
+      Database name to connect to
+    </ParamField>
+    
+    <ParamField body="username" type="string" required>
+      Database username
+    </ParamField>
+    
+    <ParamField body="password" type="string" required>
+      Database password
+    </ParamField>
+    
+    <ParamField body="ssl_mode" type="SslMode" default="prefer">
+      SSL connection mode: `disable`, `prefer`, or `require`
+    </ParamField>
+    
+    <ParamField body="save_connection" type="boolean" default="false">
+      Whether to save connection config and credentials to keyring
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ResponseField name="response" type="ConnectResponse">
+  <Expandable title="ConnectResponse properties">
+    <ResponseField name="connection_id" type="string">
+      Unique identifier for this active connection
+    </ResponseField>
+    
+    <ResponseField name="message" type="string">
+      Success message
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```typescript TypeScript
+import { invoke } from '@tauri-apps/api/tauri';
+
+const response = await invoke('connect', {
+  request: {
+    name: 'Production DB',
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'postgres',
+    password: 'secret',
+    ssl_mode: 'prefer',
+    save_connection: true
+  }
+});
+
+console.log(response.connection_id);
+```
+
+```rust Rust
+#[tauri::command]
+pub async fn connect(
+    state: State<'_, AppState>,
+    request: ConnectRequest,
+) -> Result<ConnectResponse>
+```
+</CodeGroup>
+
+---
+
+## connect_saved
+
+Connect using a previously saved connection configuration.
+
+<ParamField body="connection_id" type="string" required>
+  ID of the saved connection to connect to
+</ParamField>
+
+<ResponseField name="response" type="ConnectResponse">
+  Connection result with connection ID and success message
+</ResponseField>
+
+<CodeGroup>
+```typescript TypeScript
+const response = await invoke('connect_saved', {
+  connectionId: 'abc-123-def-456'
+});
+```
+
+```rust Rust
+#[tauri::command]
+pub async fn connect_saved(
+    state: State<'_, AppState>,
+    connection_id: String,
+) -> Result<ConnectResponse>
+```
+</CodeGroup>
+
+---
+
+## disconnect
+
+Close a database connection and clean up resources.
+
+<ParamField body="connection_id" type="string" required>
+  ID of the connection to disconnect
+</ParamField>
+
+```typescript TypeScript
+await invoke('disconnect', {
+  connectionId: 'abc-123-def-456'
+});
+```
+
+---
+
+## disconnect_all
+
+Close all active database connections.
+
+```typescript TypeScript
+await invoke('disconnect_all');
+```
+
+---
+
+## test_connection
+
+Test database connection parameters without establishing a persistent connection.
+
+<ParamField body="request" type="TestConnectionRequest" required>
+  Connection parameters to test
+  
+  <Expandable title="TestConnectionRequest properties">
+    <ParamField body="host" type="string" required>
+      Database host address
+    </ParamField>
+    
+    <ParamField body="port" type="number" required>
+      Database port
+    </ParamField>
+    
+    <ParamField body="database" type="string" required>
+      Database name
+    </ParamField>
+    
+    <ParamField body="username" type="string" required>
+      Database username
+    </ParamField>
+    
+    <ParamField body="password" type="string" required>
+      Database password
+    </ParamField>
+    
+    <ParamField body="ssl_mode" type="SslMode">
+      SSL connection mode
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ResponseField name="message" type="string">
+  Success message if connection test passes
+</ResponseField>
+
+```typescript TypeScript
+const message = await invoke('test_connection', {
+  request: {
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'postgres',
+    password: 'secret'
+  }
+});
+```
+
+---
+
+## list_active_connections
+
+Get all currently active database connections.
+
+<ResponseField name="connections" type="ConnectionInfo[]">
+  <Expandable title="ConnectionInfo properties">
+    <ResponseField name="id" type="string">
+      Unique connection identifier
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Connection display name
+    </ResponseField>
+    
+    <ResponseField name="host" type="string">
+      Database host
+    </ResponseField>
+    
+    <ResponseField name="port" type="number">
+      Database port
+    </ResponseField>
+    
+    <ResponseField name="database" type="string">
+      Database name
+    </ResponseField>
+    
+    <ResponseField name="username" type="string">
+      Username used for connection
+    </ResponseField>
+    
+    <ResponseField name="connected_at" type="string">
+      ISO 8601 timestamp when connection was established
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const connections = await invoke('list_active_connections');
+
+connections.forEach(conn => {
+  console.log(`${conn.name}: ${conn.host}:${conn.port}/${conn.database}`);
+});
+```
+
+---
+
+## is_connected
+
+Check if a specific connection is currently active.
+
+<ParamField body="connection_id" type="string" required>
+  Connection ID to check
+</ParamField>
+
+<ResponseField name="connected" type="boolean">
+  True if connection is active, false otherwise
+</ResponseField>
+
+```typescript TypeScript
+const isActive = await invoke('is_connected', {
+  connectionId: 'abc-123-def-456'
+});
+```
+
+---
+
+## ping_database
+
+Verify a connection is still alive by executing a simple query.
+
+<ParamField body="connection_id" type="string" required>
+  Connection ID to ping
+</ParamField>
+
+<ResponseField name="alive" type="boolean">
+  True if database responds to ping, false otherwise
+</ResponseField>
+
+```typescript TypeScript
+const isAlive = await invoke('ping_database', {
+  connectionId: 'abc-123-def-456'
+});
+```
+
+<Note>
+  Ping has a 5-second timeout. Returns false if the database doesn't respond within that time.
+</Note>
+
+---
+
+## Saved connection management
+
+### get_saved_connections
+
+Retrieve all saved connection configurations from secure storage.
+
+<ResponseField name="connections" type="ConnectionConfig[]">
+  <Expandable title="ConnectionConfig properties">
+    <ResponseField name="id" type="string">
+      Unique configuration identifier
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Connection display name
+    </ResponseField>
+    
+    <ResponseField name="host" type="string">
+      Database host
+    </ResponseField>
+    
+    <ResponseField name="port" type="number">
+      Database port
+    </ResponseField>
+    
+    <ResponseField name="database" type="string">
+      Database name
+    </ResponseField>
+    
+    <ResponseField name="username" type="string">
+      Database username
+    </ResponseField>
+    
+    <ResponseField name="ssl_mode" type="SslMode">
+      SSL connection mode
+    </ResponseField>
+    
+    <ResponseField name="max_connections" type="number">
+      Maximum connection pool size
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+```typescript TypeScript
+const savedConnections = await invoke('get_saved_connections');
+```
+
+<Note>
+  Passwords are stored separately in the system keyring and are not included in the returned configs.
+</Note>
+
+---
+
+### save_connection
+
+Save a connection configuration and password to secure storage.
+
+<ParamField body="config" type="ConnectionConfig" required>
+  Connection configuration to save
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Database password (stored securely in system keyring)
+</ParamField>
+
+```typescript TypeScript
+await invoke('save_connection', {
+  config: {
+    id: 'abc-123',
+    name: 'Production DB',
+    host: 'localhost',
+    port: 5432,
+    database: 'myapp',
+    username: 'postgres',
+    ssl_mode: 'require',
+    max_connections: 10
+  },
+  password: 'secret'
+});
+```
+
+---
+
+### delete_saved_connection
+
+Remove a saved connection configuration and its password.
+
+<ParamField body="connection_id" type="string" required>
+  ID of the connection to delete
+</ParamField>
+
+```typescript TypeScript
+await invoke('delete_saved_connection', {
+  connectionId: 'abc-123-def-456'
+});
+```
+
+---
+
+### get_saved_password
+
+Retrieve a saved password from the system keyring.
+
+<ParamField body="connection_id" type="string" required>
+  Connection ID
+</ParamField>
+
+<ResponseField name="password" type="string">
+  The saved password
+</ResponseField>
+
+```typescript TypeScript
+const password = await invoke('get_saved_password', {
+  connectionId: 'abc-123-def-456'
+});
+```
+
+---
+
+### save_password
+
+Save or update a password in the system keyring.
+
+<ParamField body="project_id" type="string" required>
+  Project/connection identifier
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Password to save
+</ParamField>
+
+```typescript TypeScript
+await invoke('save_password', {
+  projectId: 'abc-123',
+  password: 'new-secret'
+});
+```
+
+---
+
+### delete_password
+
+Remove a saved password from the system keyring.
+
+<ParamField body="project_id" type="string" required>
+  Project/connection identifier
+</ParamField>
+
+```typescript TypeScript
+await invoke('delete_password', {
+  projectId: 'abc-123'
+});
+```

@@ -1,0 +1,258 @@
+---
+title: Filtering and sorting
+description: Advanced filtering with type-aware operators and multi-column sorting
+---
+
+Tusker provides powerful filtering and sorting capabilities that adapt to your column types. Build complex multi-column filters and sort by multiple columns with a single click.
+
+## Filtering
+
+### Opening the filter panel
+
+Click the **Filter** button in the table toolbar to open the filter panel. The panel appears inline above the data grid.
+
+### Adding filter rules
+
+1. Click **Add filter** in the filter panel
+2. Select a column from the dropdown
+3. Choose an operator (operators adapt to the column type)
+4. Enter a value (or values for `between` operator)
+5. The filter applies automatically as you type
+
+Filters are persisted per table across sessions.
+
+<Info>
+  Filters use debounced input - the query executes 300ms after you stop typing.
+</Info>
+
+### Type-aware operators
+
+Operators automatically adapt based on the column's PostgreSQL data type:
+
+#### Text columns
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `contains` | Substring match (case-sensitive) | Name contains "John" |
+| `not contains` | Does not contain substring | Name not contains "Test" |
+| `equals` | Exact match | Email equals "user@example.com" |
+| `not equals` | Not equal to value | Status not equals "deleted" |
+| `starts with` | Begins with value | Name starts with "Dr." |
+| `ends with` | Ends with value | Email ends with "@company.com" |
+| `is null` | Column is NULL | Notes is null |
+| `is not null` | Column is not NULL | Phone is not null |
+
+#### Numeric columns
+
+For `integer`, `bigint`, `smallint`, `decimal`, `numeric`, `float`, `double precision`, `real`, `money`:
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `=` | Equal to | Price = 99.99 |
+| `!=` | Not equal to | Quantity != 0 |
+| `>` | Greater than | Age &gt; 18 |
+| `<` | Less than | Stock &lt; 10 |
+| `>=` | Greater than or equal | Score &gt;= 70 |
+| `<=` | Less than or equal | Discount &lt;= 50 |
+| `between` | Range (inclusive) | Amount between 100 and 500 |
+| `is null` | Column is NULL | Salary is null |
+| `is not null` | Column is not NULL | Revenue is not null |
+
+<Accordion title="Using the between operator">
+  The `between` operator requires two values:
+  1. Enter the minimum value in the first input
+  2. Enter the maximum value in the second input
+  3. Query returns rows where column value is &gt;= min AND &lt;= max
+</Accordion>
+
+#### Boolean columns
+
+| Operator | Description |
+|----------|-------------|
+| `is true` | Column is TRUE |
+| `is false` | Column is FALSE |
+| `is null` | Column is NULL |
+| `is not null` | Column is not NULL |
+
+#### Date and timestamp columns
+
+For `date`, `time`, `timestamp`, `timestamptz`:
+
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `equals` | Exact date match | Created equals 2024-03-01 |
+| `not equals` | Not equal to date | Modified not equals 2024-01-01 |
+| `after` | Later than date | Due after 2024-06-01 |
+| `before` | Earlier than date | Submitted before 2024-01-01 |
+| `between` | Date range | Created between 2024-01-01 and 2024-03-31 |
+| `is null` | Column is NULL | Deleted is null |
+| `is not null` | Column is not NULL | Published is not null |
+
+<Tip>
+  Use date inputs for date columns - the browser provides a native date picker for easy selection.
+</Tip>
+
+#### Enum columns
+
+For PostgreSQL enum types:
+
+| Operator | Description |
+|----------|-------------|
+| `equals` | Matches enum value |
+| `not equals` | Does not match value |
+| `is null` | Column is NULL |
+| `is not null` | Column is not NULL |
+
+Enum values appear in a searchable dropdown - just select the value, no typing required.
+
+#### UUID columns
+
+| Operator | Description |
+|----------|-------------|
+| `equals` | Exact UUID match |
+| `not equals` | Not equal to UUID |
+| `is null` | Column is NULL |
+| `is not null` | Column is not NULL |
+
+#### JSON and array columns
+
+For `json`, `jsonb`, and array types (`text[]`, `int[]`, etc.):
+
+| Operator | Description |
+|----------|-------------|
+| `is null` | Column is NULL |
+| `is not null` | Column is not NULL |
+| `contains` | JSON/array contains value |
+
+<Note>
+  Advanced JSON operators (path queries, key existence) are not yet supported in the visual filter UI. Use the SQL playground for complex JSON queries.
+</Note>
+
+### Multi-column filters
+
+Add multiple filter rules to narrow results:
+
+1. Create your first filter rule
+2. Click **Add filter** to add another
+3. Repeat for as many filters as needed
+4. All filters are combined with AND logic
+
+**Example:**
+```
+Status equals "active"
+AND Created after 2024-01-01  
+AND Email ends with "@company.com"
+```
+
+### Removing filters
+
+- Click the `×` icon on any filter rule to remove it
+- Click **Clear all** to remove all filters at once
+
+### Filter persistence
+
+Filters are automatically saved per table:
+
+- Persists across browser sessions
+- Unique to each table
+- Cleared when you manually remove filters
+- Does not persist when you close the tab
+
+## Sorting
+
+### Single column sort
+
+Click any column header to sort by that column:
+
+- **First click** - Sort ascending (A-Z, 0-9, oldest-newest)
+- **Second click** - Sort descending (Z-A, 9-0, newest-oldest)
+- **Third click** - Remove sort (return to default order)
+
+A small arrow indicator shows the current sort direction.
+
+### Multi-column sort
+
+<Info>
+  Hold `Shift` while clicking column headers to add secondary, tertiary, and further sort levels.
+</Info>
+
+To sort by multiple columns:
+
+1. Click the first column header to set primary sort
+2. **Hold Shift** and click a second column header for secondary sort
+3. **Hold Shift** and click additional columns for further levels
+
+**Example workflow:**
+1. Click `status` header → Sorts by status ascending
+2. Shift+click `created_at` header → Sorts by status, then by date within each status
+3. Shift+click `name` header → Sorts by status, then date, then name
+
+Each sorted column shows:
+- **Arrow** - Direction (↑ ascending, ↓ descending)
+- **Number** - Sort order (1 = primary, 2 = secondary, etc.)
+
+### Removing sorts
+
+To remove sorting:
+
+- Click a sorted column header until the arrow disappears
+- Click **Clear sort** in the sort popover
+
+Or click the filter button and choose **Clear all sorts** to remove all sort columns.
+
+### Sort persistence
+
+Sort configuration is saved per table:
+
+- Direction (ASC/DESC)
+- Column order (primary, secondary, etc.)
+- Persists across sessions
+- Unique to each table
+
+## Combining filters and sorts
+
+Filters and sorts work together:
+
+1. **Filters** reduce the rows returned from the database
+2. **Sorts** order the filtered results
+3. **Pagination** splits the sorted, filtered data into pages
+
+**Example:**
+```
+Filter: Status = "active" AND Created > 2024-01-01
+Sort: Created DESC, Name ASC
+Result: Active users created after Jan 1, sorted by newest first, then alphabetically
+```
+
+<Tip>
+  Filters run server-side in PostgreSQL for performance. Large tables filter efficiently even with millions of rows.
+</Tip>
+
+## Performance considerations
+
+### Index usage
+
+Filters perform best on indexed columns:
+
+- Primary key columns
+- Columns with explicit indexes  
+- Foreign key columns (automatically indexed)
+
+Unindexed columns may result in full table scans on large tables.
+
+### Complex filters
+
+Some filter operations are faster than others:
+
+**Fast:**
+- Equality (`=`, `equals`)
+- Range queries on indexed columns (`>`, `<`, `between`)
+- `is null` / `is not null`
+
+**Slower:**
+- `contains` / `not contains` (requires full scan unless using trigram indexes)
+- `starts with` / `ends with` (unless using appropriate indexes)
+
+### Multi-column sorts
+
+Sorting by multiple columns may require database-level composite indexes for optimal performance on very large tables.

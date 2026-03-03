@@ -1,0 +1,262 @@
+---
+title: Change management
+description: Git-like change management with staging, commits, and full diff history
+---
+
+Tusker provides a Git-inspired workflow for managing database changes. Stage edits, review diffs, write commit messages, and maintain a complete history of all modifications.
+
+## How it works
+
+Unlike traditional database tools that apply changes immediately, Tusker gives you control:
+
+1. **Edit data** - Make inserts, updates, or deletes in table views
+2. **Stage changes** - Edits are queued locally for review
+3. **Review diffs** - See exactly what will change before committing
+4. **Commit** - Apply all staged changes in a single transaction
+5. **History** - Every commit is recorded with a message and full diff
+
+<Info>
+  This workflow prevents accidental data modifications and gives you a clear audit trail.
+</Info>
+
+## Staged changes
+
+### Viewing staged changes
+
+Click the **Staged Changes** tab (or press `Cmd/Ctrl+Shift+S`) to see all pending modifications:
+
+- **Inserts** - New rows to be added (green badge)
+- **Updates** - Modified rows with before/after values (amber badge)
+- **Deletes** - Rows marked for deletion (red badge)
+
+Each change shows:
+- Table and schema name
+- Change type (INSERT, UPDATE, DELETE)
+- Affected data with visual diff
+- Generated SQL statement
+
+### Filtering changes
+
+Use the filter toolbar to focus on specific changes:
+
+- **By type** - Show only inserts, updates, or deletes
+- **By table** - Filter to a specific table
+- **Combined filters** - Both type and table
+
+<Accordion title="Example: Review user updates">
+  1. Click the "Updates" filter chip
+  2. Select "public.users" from the table dropdown
+  3. See only user update operations
+  4. Review each change individually
+</Accordion>
+
+### Change cards
+
+Each staged change displays as an expandable card:
+
+**Insert card:**
+```
++ INSERT INTO public.users
+New row:
+  email: "alice@example.com"
+  name: "Alice Johnson"
+  role: "admin"
+```
+
+**Update card:**
+```diff
+~ UPDATE public.users
+Changes:
+- email: "bob@oldmail.com"
++ email: "bob@newmail.com"
+  name: "Bob Smith" (unchanged)
+```
+
+**Delete card:**
+```
+- DELETE FROM public.orders
+Deleted row:
+  id: 12345
+  customer_id: 67
+  total: 299.99
+```
+
+### Discarding changes
+
+Remove individual changes before committing:
+
+- Click the trash icon on any change card to discard it
+- Click **Discard All** to remove all staged changes
+- Changes are permanently removed (cannot be undone)
+
+## Committing changes
+
+### Commit workflow
+
+1. Click **Commit Changes** in the staged changes tab
+2. Enter an optional commit message (or use the auto-generated summary)
+3. Click **Commit** to apply all changes
+
+<Note>
+  All staged changes are applied in a single database transaction. If any change fails, the entire commit is rolled back.
+</Note>
+
+### Commit messages
+
+Tusker auto-generates a summary of your changes:
+
+```
+3 inserts, 5 updates, 1 delete on public.users, public.orders
+```
+
+You can replace this with a custom message:
+
+```
+Update user email addresses and add new admin accounts
+```
+
+Commit messages help you understand what changed when reviewing history later.
+
+### Commit execution
+
+When you commit:
+
+1. **Transaction begins** - Database transaction starts
+2. **Changes apply** - Each staged change executes in order
+3. **Validation** - Database enforces all constraints
+4. **Commit or rollback** - Transaction commits on success, rolls back on error
+5. **History recorded** - Successful commits are saved to history
+
+If any step fails, you'll see a detailed error message and no changes will be applied.
+
+## Commit history
+
+Every successful commit is recorded with complete details.
+
+### Viewing history
+
+Open the **Commit History** tab to see all commits for the current project:
+
+- Commits listed in reverse chronological order (newest first)
+- Each entry shows:
+  - Commit message
+  - Auto-generated summary
+  - Timestamp
+  - Number of changes
+
+### Commit details
+
+Click any commit to expand the full diff:
+
+```
+Commit: Update user roles for Q1 2024
+Date: 2024-03-03 14:23:45
+Changes: 12 updates on public.users
+
+Change 1/12: UPDATE public.users
+- role: "user"
++ role: "admin"
+WHERE email = 'alice@example.com'
+
+Change 2/12: UPDATE public.users
+...
+```
+
+Each change in the commit shows:
+- Full before/after values
+- SQL statement executed
+- Row identifier (primary key or full row data)
+
+### Search history
+
+Use the search box to filter commits:
+
+- Search commit messages
+- Search summaries
+- Filter by table name
+- Filter by date range (coming soon)
+
+<Tip>
+  Use descriptive commit messages to make searching history easier.
+</Tip>
+
+## Instant commit mode
+
+For rapid development or trusted operations, enable **Instant Commit** mode in project settings:
+
+1. Open project settings (gear icon in sidebar)
+2. Toggle **Instant Commit Mode**
+3. Changes apply immediately without staging
+
+In instant commit mode:
+- Edits execute immediately when you save a cell
+- No staged changes tab
+- Changes still recorded in commit history
+- Each edit gets its own commit
+
+<Info>
+  Instant mode is useful for development databases, but we recommend staging mode for production data.
+</Info>
+
+## Comparison with Git
+
+Tusker's change management borrows concepts from Git:
+
+| Git Concept | Tusker Equivalent |
+|-------------|-------------------|
+| Working directory | Table view with edits |
+| Staging area | Staged changes tab |
+| `git add` | Automatic staging |
+| `git commit` | Commit changes button |
+| `git log` | Commit history tab |
+| Commit message | User-entered or auto-summary |
+| Branch | N/A (single timeline) |
+| Revert | Manual undo via SQL |
+
+## Best practices
+
+### Review before committing
+
+Always review your staged changes before committing:
+- Check affected row counts
+- Verify UPDATE diffs show expected changes
+- Ensure DELETE operations target the right rows
+- Look for unintended changes
+
+### Write clear commit messages
+
+Good commit messages help you and your team:
+
+✅ **Good:**
+- "Fix customer email typos in batch import"
+- "Archive completed orders from Q4 2023"
+- "Update product prices for spring sale"
+
+❌ **Avoid:**
+- "changes"
+- "updates"
+- "fix"
+
+### Group related changes
+
+Commit logically related changes together:
+
+✅ **Good:**
+- All price updates for a sale in one commit
+- All user role changes for a team in one commit
+
+❌ **Avoid:**
+- Mixing unrelated table changes
+- Committing after every single edit
+
+### Use instant mode carefully
+
+Enable instant commit only when:
+- Working on a development database
+- Making trusted, low-risk changes
+- You need rapid iteration speed
+
+Disable instant mode for:
+- Production databases
+- Bulk operations
+- Unfamiliar data

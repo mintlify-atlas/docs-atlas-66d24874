@@ -1,0 +1,170 @@
+---
+title: Table editing
+description: Type-aware inline editing with smart column detection and foreign key lookups
+---
+
+Tusker provides a powerful inline editing experience that adapts to your PostgreSQL column types. Every cell editor is tailored to the data type, eliminating generic text fields and reducing errors.
+
+## Type-aware cell editors
+
+Each column type gets a dedicated input component designed for that specific data:
+
+### Numeric types
+
+Dedicated numeric inputs with arrow-key increment/decrement support for:
+
+- `integer`, `bigint`, `smallint`
+- `decimal`, `numeric`
+- `float`, `double precision`, `real`
+- `money`
+
+Double-click any numeric cell to edit inline. Use up/down arrow keys to increment or decrement values.
+
+### Boolean values
+
+Boolean columns render as a visual checkbox with a dropdown toggle:
+
+- `true` - Checked box with green accent
+- `false` - Unchecked box
+- `NULL` - Explicit NULL badge
+
+Click to toggle between the three states.
+
+### Dates and timestamps
+
+Native date/time pickers for temporal types:
+
+- `date` - Calendar picker
+- `time` - Time selector
+- `timestamp` - Combined date and time
+- `timestamptz` - Timezone-aware timestamp
+
+Double-click to open the picker, or type values directly in ISO format.
+
+### Enums
+
+PostgreSQL enum types are auto-detected and rendered as searchable dropdown selects. The editor displays all valid enum values from your database schema.
+
+<Tip>
+  Enum dropdowns are searchable - just start typing to filter options.
+</Tip>
+
+### JSON and JSONB
+
+Structured data columns get expandable textarea editors:
+
+- Inline preview for short values (under 50 characters)
+- Expand/collapse toggle for longer JSON
+- Syntax validation on edit
+- Pretty-printed formatting in expanded view
+
+### Arrays
+
+Tag-based array editors for PostgreSQL array types:
+
+- `text[]` - String array with tag input
+- `int[]` - Numeric array
+- Any custom array type
+
+Add or remove elements individually, or paste comma-separated values.
+
+### Large text values
+
+Text values over 500 characters are automatically truncated in the table view with:
+
+- Visual truncation indicator (`...`)
+- Expandable modal editor for full content
+- Preserved formatting and whitespace
+
+## NULL handling
+
+Tusker provides explicit NULL display and toggling across all column types:
+
+- NULL values display as a gray `NULL` badge
+- Clear visual distinction from empty strings
+- Easy NULL toggle in cell editors
+- Type-aware NULL validation based on column constraints
+
+## Foreign key lookups
+
+<Info>
+  Foreign key relationships are automatically detected from your database schema.
+</Info>
+
+Columns with foreign key constraints get a special searchable select dropdown:
+
+1. **Real-time search** - Type to query the referenced table
+2. **Live results** - Shows matching records as you type
+3. **Smart display** - Shows primary key and additional context columns
+4. **No manual copying** - Just search and pick from related records
+
+<Accordion title="Example: User assignments">
+  If your `tasks` table has a foreign key to `users.id`, clicking the `assigned_to` cell opens a searchable dropdown of all users. Type a name to filter, select the user, and the ID is automatically inserted.
+</Accordion>
+
+## Smart column detection
+
+Tusker analyzes your table schema to provide intelligent defaults:
+
+### Auto-increment columns
+
+Serial and auto-increment columns are automatically hidden when inserting new rows:
+
+- `serial`, `bigserial`, `smallserial`
+- Columns with `nextval()` defaults
+- UUID columns with `gen_random_uuid()` or `uuid_generate_v7()`
+- Timestamp columns with `now()` defaults
+
+These columns still appear when editing existing rows.
+
+### Primary key indicators
+
+Primary key columns show a key icon (🔑) directly in the column header, making it easy to identify your table's unique identifier at a glance.
+
+### Column metadata
+
+Hover over any column header to see:
+
+- **Data type** - PostgreSQL type name
+- **Nullability** - Whether NULL values are allowed
+- **Default value** - Database-defined default
+- **Constraints** - Primary key, unique, foreign key status
+
+## Editing workflows
+
+### Inline editing
+
+1. Double-click any cell to enter edit mode
+2. The cell editor adapts to the column's data type
+3. Press `Enter` to save, `Escape` to cancel
+4. Changes are staged locally before committing
+
+### Row detail modal
+
+For editing all columns in a single row:
+
+1. Click the row number or select "Edit Row"
+2. Full-screen modal with all columns visible
+3. Vertical layout for easier navigation
+4. Same type-aware editors as inline mode
+
+### Bulk operations
+
+- **Multi-select rows** - Shift+click or Cmd/Ctrl+click
+- **Delete multiple rows** - Select rows, then click Delete
+- **Copy values** - Select and copy with standard keyboard shortcuts
+
+<Note>
+  In instant commit mode, changes are applied immediately. Otherwise, edits are staged for review before committing.
+</Note>
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Double-click` | Edit cell |
+| `Enter` | Save cell edit |
+| `Escape` | Cancel edit |
+| `Tab` | Move to next cell (in modal) |
+| `Shift + Click` | Multi-select rows |
+| `Cmd/Ctrl + Click` | Add row to selection |

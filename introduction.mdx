@@ -1,0 +1,125 @@
+---
+title: Introduction
+description: A modern, fast PostgreSQL database client for macOS and Windows
+---
+
+<img
+  className="block dark:hidden"
+  src="https://github.com/user-attachments/assets/498af48e-be77-46b8-a240-b6ee2bc2016f"
+  alt="Tusker Icon"
+  width="160"
+  height="160"
+/>
+<img
+  className="hidden dark:block"
+  src="https://github.com/user-attachments/assets/498af48e-be77-46b8-a240-b6ee2bc2016f"
+  alt="Tusker Icon"
+  width="160"
+  height="160"
+/>
+
+# Welcome to Tusker
+
+Browse schemas, edit data, write queries, and manage your databases with a native interface. Built with Tauri 2, React, and TypeScript for exceptional performance and a modern user experience.
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Download and install Tusker on macOS or Windows
+  </Card>
+  <Card
+    title="Quick start"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Connect to your first PostgreSQL database in minutes
+  </Card>
+</CardGroup>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Type-aware inline editing" icon="pen-to-square">
+    Every cell editor adapts to the column's PostgreSQL data type — no generic text fields. Dedicated inputs for numbers, booleans, dates, enums, JSON, and arrays.
+  </Card>
+  
+  <Card title="Foreign key lookups" icon="link">
+    Columns with FK constraints get a searchable select dropdown that queries the referenced table in real time. No more copying UUIDs or IDs by hand.
+  </Card>
+  
+  <Card title="Git-like change management" icon="code-branch">
+    Track database changes with a commit-based workflow. Stage changes, review diffs, and maintain a full commit history with timestamps and messages.
+  </Card>
+  
+  <Card title="SQL playground" icon="code">
+    Full CodeMirror SQL editor with PostgreSQL syntax highlighting, autocomplete, query history, saved queries, and export results to CSV or JSON.
+  </Card>
+  
+  <Card title="Advanced filtering" icon="filter">
+    Build multi-column filter rules with operators that adapt to each column type. Filters are persisted per table across sessions.
+  </Card>
+  
+  <Card title="Table schema builder" icon="table">
+    Visual UI for creating and modifying tables with live SQL preview. Define columns, constraints, indexes, and foreign keys without writing DDL.
+  </Card>
+</CardGroup>
+
+## What makes Tusker different
+
+### Smart column detection
+
+- **Serial / auto-increment columns** are automatically hidden when inserting new rows
+- **Primary key indicators** shown directly in column headers
+- **Column metadata** — data type, nullability, defaults, and constraints visible at a glance
+
+### Multi-column sorting
+
+Click a column header to sort. **Shift+click** to add secondary, tertiary, and further sort levels. Sort direction, order, and state are persisted per table.
+
+### Multi-project connections
+
+Manage multiple PostgreSQL connections as color-coded projects with SSL support, secure credential storage via the OS keychain, and instant project switching.
+
+<Note>
+Because database passwords are stored in the OS keychain, some systems may prompt you to enter your system password or approve keychain access when establishing a connection. This is expected behavior.
+</Note>
+
+## Data import & export
+
+- **Import** CSV or JSON with auto-header detection, column mapping, data preview, and pre-import editing
+- **Export** any table or query result to CSV or JSON via native file picker
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Cmd/Ctrl + K` | Command palette |
+| `Cmd/Ctrl + B` | Toggle sidebar |
+| `Cmd/Ctrl + W` | Close active tab |
+| `Cmd/Ctrl + N` | New table |
+| `Cmd/Ctrl + T` | New query |
+| `Double-click` | Edit cell |
+| `Shift + Click` | Multi-select rows / add sort column |
+| `Escape` | Close modals & popovers |
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Install Tusker"
+    icon="download"
+    href="/installation"
+  >
+    Get started by installing Tusker on your system
+  </Card>
+  <Card
+    title="Connect to a database"
+    icon="database"
+    href="/quickstart"
+  >
+    Follow the quick start guide to connect to PostgreSQL
+  </Card>
+</CardGroup>

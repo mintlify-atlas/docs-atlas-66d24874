@@ -1,80 +1,177 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick start
+description: Connect to your first PostgreSQL database in minutes
 ---
 
-## Get started in three steps
+## Prerequisites
 
-Get your documentation site running locally and make your first customization.
+Before you begin, make sure you have:
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+- Tusker installed on your system ([installation guide](/installation))
+- Access to a PostgreSQL database (local or remote)
+- Database credentials: host, port, database name, username, and password
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  If you don't have a PostgreSQL database yet, you can install it locally from [postgresql.org](https://www.postgresql.org/download/) or use a cloud provider like [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app).
 </Note>
+
+## Connect to a database
+
+<Steps>
+  <Step title="Launch Tusker">
+    Open Tusker from your Applications folder (macOS) or Start menu (Windows).
+  </Step>
+  
+  <Step title="Create a new project">
+    Click **New Project** or press `Cmd/Ctrl + K` to open the command palette and select **New Project**.
+  </Step>
+  
+  <Step title="Enter connection details">
+    Fill in your PostgreSQL connection details:
+    
+    - **Project Name**: A friendly name for this connection (e.g., "Production DB" or "Local Dev")
+    - **Host**: The database server address (e.g., `localhost`, `db.example.com`, or an IP address)
+    - **Port**: The PostgreSQL port (default is `5432`)
+    - **Database**: The name of the database you want to connect to
+    - **Username**: Your PostgreSQL username
+    - **Password**: Your PostgreSQL password
+    
+    <Info>
+      Your password will be stored securely in your operating system's keychain.
+    </Info>
+  </Step>
+  
+  <Step title="Configure SSL (optional)">
+    Choose an SSL mode based on your database requirements:
+    
+    - **Disable**: No SSL encryption (not recommended for production)
+    - **Prefer**: Use SSL if available, otherwise connect without it
+    - **Require**: Only connect with SSL encryption
+    
+    <Warning>
+      For production databases, use **Require** mode to ensure all connections are encrypted.
+    </Warning>
+  </Step>
+  
+  <Step title="Choose a color (optional)">
+    Select a color to identify this project in the sidebar. This helps when managing multiple database connections.
+  </Step>
+  
+  <Step title="Test and connect">
+    Click **Test Connection** to verify your credentials, then click **Connect**.
+  </Step>
+</Steps>
+
+## Explore your database
+
+Once connected, you'll see the Tusker interface with:
+
+### Schema browser
+
+The left sidebar shows a collapsible tree of all schemas, tables, views, materialized views, and foreign tables. Right-click any item for quick operations.
+
+### Browse table data
+
+<Steps>
+  <Step title="Select a table">
+    Click any table in the schema browser to open it in a new tab.
+  </Step>
+  
+  <Step title="View and filter data">
+    Use the filter toolbar to build multi-column filter rules. Filters adapt to each column type and are persisted across sessions.
+  </Step>
+  
+  <Step title="Sort columns">
+    Click a column header to sort. **Shift+click** to add secondary and tertiary sort levels.
+  </Step>
+</Steps>
+
+### Edit data
+
+<Steps>
+  <Step title="Edit a cell">
+    Double-click any cell to edit it inline. The editor adapts to the column's PostgreSQL data type.
+  </Step>
+  
+  <Step title="Review changes">
+    Your changes are staged automatically. Click the **Changes** tab to review all pending inserts, updates, and deletes.
+  </Step>
+  
+  <Step title="Commit changes">
+    Click **Commit** in the Changes tab, add a commit message, and apply your changes to the database.
+  </Step>
+</Steps>
+
+<Info>
+  You can optionally enable **Instant Mode** in project settings to apply changes immediately without staging. This is configurable per project.
+</Info>
+
+### Run SQL queries
+
+<Steps>
+  <Step title="Open SQL playground">
+    Press `Cmd/Ctrl + T` or click **New Query** to open the SQL playground.
+  </Step>
+  
+  <Step title="Write your query">
+    Type your SQL query in the editor. You'll get PostgreSQL syntax highlighting and autocomplete.
+  </Step>
+  
+  <Step title="Execute the query">
+    Press `Cmd/Ctrl + Enter` to run your query. Results appear in a data grid below with execution time and row count.
+  </Step>
+  
+  <Step title="Export results (optional)">
+    Click **Export** to save query results as CSV or JSON.
+  </Step>
+</Steps>
+
+## Common workflows
+
+<CardGroup cols={2}>
+  <Card title="Insert new rows" icon="plus">
+    Click **Insert Row** in any table view. Auto-increment columns are automatically hidden, and foreign key columns show searchable dropdowns.
+  </Card>
+  
+  <Card title="Delete rows" icon="trash">
+    Select rows with Shift+click or Cmd/Ctrl+click, then press Delete or click **Delete Selected**.
+  </Card>
+  
+  <Card title="Create a table" icon="table">
+    Press `Cmd/Ctrl + N` to open the visual table schema builder. Define columns, constraints, and indexes with a live SQL preview.
+  </Card>
+  
+  <Card title="Import data" icon="file-import">
+    Click **Import** to upload CSV or JSON files with auto-header detection, column mapping, and data preview.
+  </Card>
+</CardGroup>
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Cmd/Ctrl + K` | Open command palette |
+| `Cmd/Ctrl + B` | Toggle sidebar |
+| `Cmd/Ctrl + W` | Close active tab |
+| `Cmd/Ctrl + N` | New table |
+| `Cmd/Ctrl + T` | New query |
+| `Cmd/Ctrl + Enter` | Execute query (in SQL playground) |
+| `Double-click` | Edit cell |
+| `Shift + Click` | Multi-select rows / add sort column |
+| `Escape` | Close modals & popovers |
+
+## Managing multiple databases
+
+Tusker supports multiple database connections:
+
+1. Click the project switcher in the sidebar or press `Cmd/Ctrl + K`
+2. Select **New Project** to add another database connection
+3. Switch between projects instantly from the sidebar
+
+Each project is color-coded and maintains its own connection settings, filters, and sort preferences.
+
+## Need help?
+
+- Check the [GitHub repository](https://github.com/18jad/tusker) for updates and documentation
+- View the [roadmap on Trello](https://trello.com/b/fdFwEise/tusker) to see what's coming next
+- Report issues or request features on [GitHub Issues](https://github.com/18jad/tusker/issues)

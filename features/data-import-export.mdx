@@ -1,0 +1,321 @@
+---
+title: Data import and export
+description: CSV and JSON import with column mapping, preview, and validation. Export tables and query results.
+---
+
+Tusker provides seamless data import and export capabilities for CSV and JSON formats, with smart column matching, data preview, and inline editing before import.
+
+## Importing data
+
+### Starting an import
+
+To import data into a table:
+
+1. Right-click a table in the sidebar
+2. Select **Import Data**
+3. Choose CSV or JSON format
+4. An import tab opens for that table
+
+### Selecting a file
+
+Click the **Select File** button or drag and drop:
+
+- **CSV files** - Must have headers in the first row
+- **JSON files** - Must be an array of objects
+
+Tusker automatically:
+- Detects CSV headers
+- Parses quoted values and multi-line fields (RFC 4180 compliant)
+- Extracts all unique keys from JSON objects
+- Displays row count and column count
+
+<Info>
+  CSV parsing supports quoted multi-line values and escaped quotes (`""`).
+</Info>
+
+### Column mapping
+
+After loading a file, Tusker analyzes the columns:
+
+#### Matched columns
+
+Columns that exist in both the import file and target table (case-insensitive match):
+
+```
+import column → table column
+"email" → email (varchar)
+"name" → name (text)
+"created_at" → created_at (timestamptz)
+```
+
+**Matched columns** display with:
+- Green checkmark icon
+- Data type from the table schema
+- Will be imported
+
+#### Extra columns
+
+Columns in the import file that don't exist in the target table:
+
+```
+"middle_name" → (no match, will be ignored)
+```
+
+**Extra columns** display with:
+- Amber warning
+- "Will be ignored" label
+- Data is discarded during import
+
+#### Missing columns
+
+Required columns in the target table that aren't in the import file:
+
+```
+"password_hash" → Required (NOT NULL, no default)
+```
+
+**Missing columns** display with:
+- Red error indicator
+- "Required" label
+- Blocks import until resolved
+
+<Note>
+  Columns with default values or nullable columns are not considered "missing" - the database will handle them automatically.
+</Note>
+
+### Data preview
+
+The preview table shows the first 100 rows of your import data:
+
+- Matched columns appear in normal text
+- Extra columns appear with strikethrough (ignored)
+- NULL values displayed as gray "NULL" badge
+- Long values truncated with ellipsis
+
+<Tip>
+  You can edit cells directly in the preview table before importing.
+</Tip>
+
+### Editing preview data
+
+Double-click any cell to edit it:
+
+1. Cell enters edit mode
+2. Type the new value
+3. Press `Enter` to save, `Escape` to cancel
+4. Modified cells show a subtle amber background
+5. Edits are applied during import
+
+**Keyboard navigation:**
+- `Tab` - Move to next cell (saves current edit)
+- `Shift+Tab` - Move to previous cell
+- `Enter` - Save and exit edit mode
+- `Escape` - Cancel edit
+
+**NULL handling:**
+- Empty input = NULL value
+- Type "NULL" (case-insensitive) = NULL value
+- Any other text = string value
+
+### Validation
+
+Before import, Tusker validates:
+
+#### Errors (block import)
+
+- **Missing required columns** - Columns with NOT NULL constraint and no default value
+- **Invalid file format** - Malformed CSV or JSON
+
+#### Warnings (allow import)
+
+- **Extra columns** - Columns in file but not in table (ignored)
+- **Empty file** - No data rows
+
+Fix all errors before the import button becomes enabled.
+
+### Executing the import
+
+Click **Import** to begin:
+
+1. Final edits are applied
+2. Extra columns are filtered out
+3. Only matched columns are imported
+4. Data is inserted in batches of 100 rows
+5. Progress bar updates
+6. Success message appears
+
+<Accordion title="Import process details">
+  - Imports use PostgreSQL's `INSERT` statement
+  - Data is sent in batches for efficiency
+  - Empty strings in non-text columns are converted to NULL
+  - All imports run in a transaction (all-or-nothing)
+  - If any row fails, the entire import rolls back
+  - Foreign key constraints are validated
+  - Unique constraints are enforced
+</Accordion>
+
+After successful import:
+- Import tab closes automatically after 2 seconds
+- Table data refreshes
+- Success toast shows row count
+
+### Handling import errors
+
+If the import fails:
+
+- **No data is committed** - Transaction rolls back
+- Error message displays the database error
+- Common errors:
+  - Foreign key violation (referenced row doesn't exist)
+  - Unique constraint violation (duplicate value)
+  - Check constraint violation (invalid value)
+  - Type mismatch (wrong data type)
+
+Fix the data in the preview table and try again.
+
+## Exporting data
+
+### Export a full table
+
+To export an entire table:
+
+1. Right-click the table in the sidebar
+2. Select **Export Table**
+3. Choose CSV or JSON format
+4. Select save location
+5. Table data exports to the file
+
+<Info>
+  Exports include all rows from the table, regardless of current filters or pagination.
+</Info>
+
+### Export filtered data
+
+To export only filtered/sorted rows:
+
+1. Apply filters and sorts in the table view
+2. Click the **Export** button in the toolbar
+3. Choose CSV or JSON format
+4. Only visible data (matching filters) is exported
+
+### Export query results
+
+To export results from a SQL query:
+
+1. Run your query in the SQL playground
+2. Click **Export** in the results toolbar
+3. Choose CSV or JSON format
+4. Results export to the file
+
+### CSV format
+
+**CSV exports include:**
+- Header row with column names
+- Quoted values containing commas, newlines, or quotes
+- Escaped quotes (`""` for literal quote character)
+- UTF-8 encoding
+- NULL values as empty fields
+
+**Example output:**
+```csv
+id,name,email,created_at
+1,"Alice Johnson",alice@example.com,2024-03-01 10:30:00
+2,"Bob Smith",bob@example.com,2024-03-02 14:45:00
+3,"Carol ""CC"" Davis",carol@example.com,2024-03-03 09:15:00
+```
+
+### JSON format
+
+**JSON exports:**
+- Array of objects format
+- Each row is an object
+- Column names are object keys
+- NULL values as `null`
+- Proper JSON escaping
+- Pretty-printed with 2-space indentation
+
+**Example output:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "created_at": "2024-03-01T10:30:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Bob Smith",
+    "email": "bob@example.com",
+    "created_at": "2024-03-02T14:45:00Z"
+  }
+]
+```
+
+## Use cases
+
+### Data migration
+
+1. Export from source database (CSV or JSON)
+2. Transform data if needed (Excel, scripts, etc.)
+3. Import to target database using Tusker
+4. Preview and validate before import
+5. Fix any issues inline
+6. Complete import
+
+### Backup and restore
+
+1. Export table to JSON for full fidelity
+2. Store export file as backup
+3. Import back when needed
+4. Data types preserved in JSON format
+
+### Data analysis
+
+1. Export table or query results to CSV
+2. Open in Excel, Google Sheets, or analysis tools
+3. Perform calculations and visualizations
+4. Share with non-technical team members
+
+### Seeding test data
+
+1. Create test data in spreadsheet
+2. Export as CSV
+3. Import to development database
+4. Edit inline if needed
+5. Populate tables quickly
+
+## Best practices
+
+### Prepare clean data
+
+Before importing:
+- Remove extra columns you don't need
+- Ensure column names match (or close match) target table
+- Validate data types match PostgreSQL types
+- Check for NULL values in NOT NULL columns
+- Ensure foreign key values exist in referenced tables
+
+### Use JSON for complex types
+
+For tables with JSON, JSONB, or array columns:
+- Use JSON export format for full type preservation
+- CSV may not preserve complex nested structures
+- JSON maintains data type information
+
+### Review before importing
+
+Always:
+- Check the column mapping section
+- Review warnings and errors
+- Preview the first few rows
+- Verify matched columns are correct
+- Edit any suspicious values
+
+### Start small
+
+For large imports:
+- Test with a small sample first (first 100 rows)
+- Verify import succeeds
+- Check data looks correct in table
+- Then import the full dataset

@@ -1,0 +1,273 @@
+---
+title: Contributing
+description: Guidelines for contributing to the Tusker project
+---
+
+## Overview
+
+Tusker is an open-source project and welcomes contributions from the community. Whether you're fixing bugs, adding features, improving documentation, or suggesting enhancements, your help is appreciated.
+
+## Getting started
+
+Before contributing, make sure you:
+
+<Steps>
+  <Step title="Set up your development environment">
+    Follow the [development setup guide](/guides/development) to get Tusker running locally
+  </Step>
+  
+  <Step title="Read the codebase">
+    Familiarize yourself with the project structure and existing code patterns
+  </Step>
+  
+  <Step title="Check existing issues">
+    Browse the [GitHub issues](https://github.com/18jad/tusker/issues) to see what's already being worked on
+  </Step>
+</Steps>
+
+## Contribution workflow
+
+### 1. Fork the repository
+
+Create your own fork of the Tusker repository:
+
+1. Visit [https://github.com/18jad/tusker](https://github.com/18jad/tusker)
+2. Click the "Fork" button in the top-right corner
+3. Clone your fork locally:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/tusker.git
+cd tusker
+```
+
+### 2. Create a feature branch
+
+Create a new branch for your changes:
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+<Note>
+  Use descriptive branch names that explain what you're working on. Examples:
+  - `feature/add-sqlite-support`
+  - `fix/connection-timeout-bug`
+  - `docs/update-installation-guide`
+</Note>
+
+### 3. Make your changes
+
+Develop your feature or fix:
+
+- Write clean, readable code that follows existing patterns
+- Add comments for complex logic
+- Test your changes thoroughly
+- Ensure the app builds and runs without errors
+
+<Info>
+  Run `bun tauri dev` frequently during development to catch issues early.
+</Info>
+
+### 4. Test locally
+
+Before submitting your changes:
+
+<Steps>
+  <Step title="Test in development mode">
+    ```bash
+    bun tauri dev
+    ```
+    Verify your changes work as expected
+  </Step>
+  
+  <Step title="Test the production build">
+    ```bash
+    bun tauri build
+    ```
+    Ensure the production build completes successfully
+  </Step>
+  
+  <Step title="Test on your platform">
+    Run the built application and verify all functionality works correctly
+  </Step>
+</Steps>
+
+### 5. Commit your changes
+
+Commit your work with clear, descriptive messages:
+
+```bash
+git add .
+git commit -m "Add descriptive commit message"
+```
+
+**Good commit messages:**
+- "Add support for PostgreSQL array types in cell editor"
+- "Fix connection timeout on slow networks"
+- "Update keyboard shortcuts documentation"
+
+**Poor commit messages:**
+- "Fix bug"
+- "Update code"
+- "Changes"
+
+<Warning>
+  Make sure your commits are focused and logical. Each commit should represent a single cohesive change.
+</Warning>
+
+### 6. Push to your fork
+
+Push your branch to GitHub:
+
+```bash
+git push origin feature/your-feature-name
+```
+
+### 7. Submit a pull request
+
+<Steps>
+  <Step title="Open a pull request">
+    Navigate to the original Tusker repository and click "New Pull Request"
+  </Step>
+  
+  <Step title="Select your branch">
+    Choose your fork and feature branch as the source
+  </Step>
+  
+  <Step title="Write a clear description">
+    Explain:
+    - What changes you made
+    - Why you made them
+    - How to test the changes
+    - Any related issues (use "Fixes #123" to auto-close issues)
+  </Step>
+  
+  <Step title="Submit for review">
+    Click "Create Pull Request" and wait for feedback from maintainers
+  </Step>
+</Steps>
+
+## Contribution guidelines
+
+### Code style
+
+- **TypeScript/React**: Follow existing code formatting and patterns
+- **Rust**: Use `cargo fmt` to format Rust code before committing
+- **Naming**: Use clear, descriptive variable and function names
+- **Comments**: Add comments for complex logic, but prefer self-documenting code
+
+### What to contribute
+
+We welcome contributions in these areas:
+
+<Accordion title="Bug fixes">
+  Found a bug? Submit a fix!
+  - Include steps to reproduce the bug in your PR description
+  - Explain how your fix addresses the issue
+  - Test thoroughly before submitting
+</Accordion>
+
+<Accordion title="New features">
+  Have an idea for a feature?
+  - Open an issue first to discuss the feature with maintainers
+  - Ensure it aligns with Tusker's goals and roadmap
+  - Break large features into smaller, reviewable PRs
+</Accordion>
+
+<Accordion title="Documentation improvements">
+  Documentation is always appreciated!
+  - Fix typos and clarify unclear sections
+  - Add examples and use cases
+  - Update outdated information
+</Accordion>
+
+<Accordion title="Performance optimizations">
+  Make Tusker faster!
+  - Profile before optimizing to identify real bottlenecks
+  - Include benchmarks showing the improvement
+  - Ensure optimizations don't sacrifice code readability
+</Accordion>
+
+### What not to contribute
+
+- Large refactors without prior discussion
+- Features that don't align with Tusker's purpose
+- Breaking changes without a clear migration path
+- Code copied from other projects without proper attribution
+
+## Pull request review process
+
+After submitting a PR:
+
+1. **Automated checks** may run (if configured)
+2. **Maintainer review** - A project maintainer will review your code
+3. **Feedback** - You may receive requests for changes
+4. **Revision** - Make requested changes and push new commits
+5. **Approval** - Once approved, your PR will be merged
+
+<Note>
+  Be patient during review. Maintainers are often volunteers and may take time to respond. Feel free to ping after a week if you haven't heard back.
+</Note>
+
+## Communication
+
+### Reporting bugs
+
+When reporting bugs, include:
+
+- Tusker version number
+- Operating system and version
+- Steps to reproduce the issue
+- Expected vs actual behavior
+- Screenshots or error messages (if applicable)
+- Database version and connection details (if relevant)
+
+### Suggesting features
+
+When suggesting features:
+
+- Check if it's already on the [roadmap](https://trello.com/b/fdFwEise/tusker)
+- Explain the use case and benefit
+- Consider whether it fits Tusker's scope
+- Be open to discussion and alternative approaches
+
+### Getting help
+
+- **GitHub Issues**: For bug reports and feature requests
+- **GitHub Discussions**: For questions and general discussion (if enabled)
+- **Pull Request Comments**: For questions about specific code changes
+
+## Code of conduct
+
+While contributing:
+
+- Be respectful and constructive in all interactions
+- Welcome newcomers and help them get started
+- Focus on what's best for the project and community
+- Accept constructive criticism gracefully
+- Show empathy towards other contributors
+
+## Recognition
+
+All contributors are valued! Your contributions will be:
+
+- Credited in the commit history
+- Visible in the GitHub contributors list
+- Appreciated by users who benefit from your work
+
+## Questions?
+
+If you have questions about contributing:
+
+1. Check this guide first
+2. Review existing issues and PRs for examples
+3. Open a GitHub issue asking for clarification
+4. Reach out to maintainers through GitHub
+
+<Info>
+  First-time contributor? Look for issues labeled "good first issue" - these are great starting points for getting familiar with the codebase.
+</Info>
+
+## Thank you
+
+Thank you for considering contributing to Tusker! Every contribution, no matter how small, helps make Tusker better for everyone.
